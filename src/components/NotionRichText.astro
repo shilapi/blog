@@ -1,23 +1,18 @@
 ---
+import { asRecord } from "../lib/notion/shared";
+import type { UnknownRecord } from "../lib/notion/types";
+
 interface Props {
   richText?: unknown;
 }
 
-type RecordLike = Record<string, unknown>;
-
-function asRecord(value: unknown): RecordLike | null {
-  return typeof value === "object" && value !== null
-    ? (value as RecordLike)
-    : null;
-}
-
-function textOf(item: RecordLike): string {
+function textOf(item: UnknownRecord): string {
   if (typeof item.plain_text === "string") return item.plain_text;
   const text = asRecord(item.text);
   return typeof text?.content === "string" ? text.content : "";
 }
 
-function hrefOf(item: RecordLike): string | undefined {
+function hrefOf(item: UnknownRecord): string | undefined {
   if (typeof item.href === "string") return item.href;
   const text = asRecord(item.text);
   const link = asRecord(text?.link);
@@ -27,7 +22,7 @@ function hrefOf(item: RecordLike): string | undefined {
 const items = Array.isArray(Astro.props.richText)
   ? Astro.props.richText
       .map(asRecord)
-      .filter((item): item is RecordLike => item !== null)
+      .filter((item): item is UnknownRecord => item !== null)
   : [];
 ---
 

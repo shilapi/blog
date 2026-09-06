@@ -1,51 +1,15 @@
 ---
 import NotionBlock from "./NotionBlock.astro";
 import type { NotionBlock as Block } from "../lib/notion";
+import { groupNotionLists, notionHeadings } from "../lib/notion-render";
+import "../styles/notion-blocks.css";
 
 interface Props {
   blocks: Block[];
 }
 
-function groupLists(blocks: Block[]): Block[] {
-  const grouped: Block[] = [];
-
-  for (const block of blocks) {
-    const listType =
-      block.type === "bulleted_list_item"
-        ? "bulleted_list"
-        : block.type === "numbered_list_item"
-          ? "numbered_list"
-          : block.type === "to_do"
-            ? "to_do_list"
-            : null;
-
-    if (!listType) {
-      grouped.push(block);
-      continue;
-    }
-
-    const previous = grouped.at(-1);
-    if (previous?.type === listType) {
-      previous.children ??= [];
-      previous.children.push(block);
-    } else {
-      grouped.push({
-        id: `${block.id}-list`,
-        type: listType,
-        hasChildren: true,
-        data: {},
-        children: [block],
-      });
-    }
-  }
-
-  return grouped;
-}
-
-const groupedBlocks = groupLists(Astro.props.blocks);
-const headings = Astro.props.blocks.filter((block) =>
-  ["heading_1", "heading_2", "heading_3"].includes(block.type),
-);
+const groupedBlocks = groupNotionLists(Astro.props.blocks);
+const headings = notionHeadings(Astro.props.blocks);
 ---
 
 <div class="notion-blocks">

@@ -1,0 +1,169 @@
+---
+interface Props {
+  text: string;
+  language?: string;
+}
+
+const { text, language } = Astro.props;
+const languageClass = language ? `language-${language}` : undefined;
+---
+
+<div class="notion-code-shell">
+  <button
+    class="notion-code-copy"
+    type="button"
+    data-copy-code
+    aria-label="复制代码"
+  >
+    copy
+  </button>
+  <pre
+    class:list={["notion-code-block", languageClass]}
+    tabindex="0"
+    set:text={text}
+  />
+</div>
+
+<style>
+  .notion-code-shell {
+    position: relative;
+    min-width: 0;
+  }
+
+  :global(li) > .notion-code-shell {
+    margin-top: 0.65rem;
+  }
+
+  .notion-code-copy {
+    position: absolute;
+    z-index: 1;
+    top: 0.65rem;
+    right: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    color: var(--muted);
+    border: 0;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--background) 76%, transparent);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    line-height: 1.25;
+    cursor: pointer;
+  }
+
+  .notion-code-copy:hover,
+  .notion-code-copy:focus-visible,
+  .notion-code-copy[data-copied="true"] {
+    color: var(--accent-strong);
+    outline: none;
+  }
+
+  .notion-code-block {
+    overflow-x: auto;
+    margin: 0;
+    padding: 0.875rem 1rem;
+    color: var(--foreground);
+    border: 1px solid var(--border);
+    background: #0d0a16;
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    line-height: 1.6;
+    scrollbar-color: transparent transparent;
+    scrollbar-width: thin;
+    white-space: pre;
+  }
+
+  .notion-code-block[data-scrolling="true"] {
+    scrollbar-color: color-mix(in srgb, var(--accent) 48%, transparent)
+      transparent;
+  }
+
+  .notion-code-block::-webkit-scrollbar {
+    height: 0.5rem;
+    background: transparent;
+  }
+
+  .notion-code-block::-webkit-scrollbar-track {
+    border: 0;
+    background: transparent;
+  }
+
+  .notion-code-block::-webkit-scrollbar-thumb {
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+  }
+
+  .notion-code-block[data-scrolling="true"]::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--accent) 48%, transparent);
+  }
+</style>
+
+<script>
+  const fallbackCopy = (text: string) => {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.setAttribute("readonly", "");
+    textarea.style.position = "fixed";
+    textarea.style.opacity = "0";
+    document.body.append(textarea);
+    textarea.select();
+    const legacyDocument = document as unknown as {
+      execCommand(commandId: string): boolean;
+    };
+    const copied = legacyDocument.execCommand("copy");
+    textarea.remove();
+    return copied;
+  };
+
+  document.addEventListener("click", async (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    const button = target.closest<HTMLButtonElement>("[data-copy-code]");
+    if (!button) return;
+
+    const code = button.nextElementSibling;
+    if (!(code instanceof HTMLPreElement)) return;
+
+    const text = code.textContent ?? "";
+    let copied = false;
+
+    try {
+      await navigator.clipboard.writeText(text);
+      copied = true;
+    } catch {
+      copied = fallbackCopy(text);
+    }
+
+    if (!copied) return;
+
+    button.textContent = "copied";
+    button.dataset.copied = "true";
+    window.setTimeout(() => {
+      button.textContent = "copy";
+      delete button.dataset.copied;
+    }, 1200);
+  });
+
+  const scrollTimers = new WeakMap<Element, number>();
+
+  document.addEventListener(
+    "scroll",
+    (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLPreElement)) return;
+      if (!target.classList.contains("notion-code-block")) return;
+
+      target.dataset.scrolling = "true";
+      const previousTimer = scrollTimers.get(target);
+      if (previousTimer) window.clearTimeout(previousTimer);
+
+      const timer = window.setTimeout(() => {
+        delete target.dataset.scrolling;
+        scrollTimers.delete(target);
+      }, 700);
+      scrollTimers.set(target, timer);
+    },
+    true,
+  );
+</script>

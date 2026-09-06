@@ -1,6 +1,14 @@
 ---
+import NotionCodeBlock from "./NotionCodeBlock.astro";
 import NotionRichText from "./NotionRichText.astro";
 import { textFromRichText, type NotionBlock as Block } from "../lib/notion";
+import {
+  linkFromNotionData,
+  notionCellRichText,
+  notionHeadingId,
+  notionIconText,
+  youTubeEmbedUrl,
+} from "../lib/notion-render";
 
 interface Props {
   block: Block;
@@ -12,58 +20,6 @@ const data = block.data;
 const richText = data.rich_text;
 const text = textFromRichText(richText);
 const caption = data.caption;
-const codeClass =
-  typeof data.language === "string" ? `language-${data.language}` : undefined;
-
-function slugify(value: string): string {
-  return (
-    value
-      .toLowerCase()
-      .trim()
-      .replace(/[^\p{Letter}\p{Number}]+/gu, "-")
-      .replace(/^-+|-+$/g, "") || block.id
-  );
-}
-
-function linkFromData(value: unknown): string {
-  if (typeof value === "string") return value;
-  const record = value as Record<string, unknown> | null;
-  if (!record || typeof record !== "object") return "";
-  if (typeof record.url === "string") return record.url;
-  const external = record.external as Record<string, unknown> | undefined;
-  return typeof external?.url === "string" ? external.url : "";
-}
-
-function iconText(value: unknown): string {
-  const icon = value as Record<string, unknown> | null;
-  return icon && typeof icon.emoji === "string" ? icon.emoji : "💡";
-}
-
-function cellRichText(cell: unknown): unknown[] {
-  return Array.isArray(cell) ? cell : [];
-}
-
-function externalUrl(value: unknown): string {
-  return linkFromData(value);
-}
-
-function youTubeEmbedUrl(value: string): string | undefined {
-  try {
-    const url = new URL(value);
-    if (url.hostname === "youtu.be") {
-      return url.pathname.slice(1)
-        ? `https://www.youtube.com/embed/${url.pathname.slice(1)}`
-        : undefined;
-    }
-    if (url.hostname.endsWith("youtube.com")) {
-      const id = url.searchParams.get("v");
-      return id ? `https://www.youtube.com/embed/${id}` : undefined;
-    }
-  } catch {
-    // The normal video element below will not be rendered for an invalid URL.
-  }
-  return undefined;
-}
 ---
 
 {
@@ -84,7 +40,7 @@ function youTubeEmbedUrl(value: string): string | undefined {
       case "heading_1":
         return (
           <>
-            <h2 id={slugify(text)}>
+            <h2 id={notionHeadingId(text, block.id)}>
               <NotionRichText richText={richText} />
             </h2>
             {block.children?.map((child) => (
@@ -96,7 +52,7 @@ function youTubeEmbedUrl(value: string): string | undefined {
       case "heading_2":
         return (
           <>
-            <h3 id={slugify(text)}>
+            <h3 id={notionHeadingId(text, block.id)}>
               <NotionRichText richText={richText} />
             </h3>
             {block.children?.map((child) => (
@@ -108,7 +64,7 @@ function youTubeEmbedUrl(value: string): string | undefined {
       case "heading_3":
         return (
           <>
-            <h4 id={slugify(text)}>
+            <h4 id={notionHeadingId(text, block.id)}>
               <NotionRichText richText={richText} />
             </h4>
             {block.children?.map((child) => (
@@ -132,7 +88,7 @@ function youTubeEmbedUrl(value: string): string | undefined {
       case "callout":
         return (
           <aside class="notion-callout">
-            <span class="notion-callout-icon">{iconText(data.icon)}</span>
+            <span class="notion-callout-icon">{notionIconText(data.icon)}</span>
             <div class="notion-callout-body">
               <NotionRichText richText={richText} />
               {block.children?.map((child) => (
@@ -144,21 +100,12 @@ function youTubeEmbedUrl(value: string): string | undefined {
 
       case "code":
         return (
-          <div class="notion-code-shell">
-            <button
-              class="notion-code-copy"
-              type="button"
-              data-copy-code
-              aria-label="复制代码"
-            >
-              copy
-            </button>
-            <pre
-              class:list={["notion-code-block", codeClass]}
-              tabindex="0"
-              set:text={text}
-            />
-          </div>
+          <NotionCodeBlock
+            text={text}
+            language={
+              typeof data.language === "string" ? data.language : undefined
+            }
+          />
         );
 
       case "image":
@@ -178,7 +125,7 @@ function youTubeEmbedUrl(value: string): string | undefined {
         ) : null;
 
       case "video": {
-        const url = block.assetUrl || externalUrl(data.external);
+        const url = block.assetUrl || linkFromNotionData(data.external);
         const youTubeUrl = url ? youTubeEmbedUrl(url) : undefined;
         return youTubeUrl ? (
           <iframe
@@ -284,7 +231,9 @@ function youTubeEmbedUrl(value: string): string | undefined {
                         const Cell = isHeader ? "th" : "td";
                         return (
                           <Cell>
-                            <NotionRichText richText={cellRichText(cell)} />
+                            <NotionRichText
+                              richText={notionCellRichText(cell)}
+                            />
                           </Cell>
                         );
                       })}
@@ -311,19 +260,27 @@ function youTubeEmbedUrl(value: string): string | undefined {
 
       case "bookmark":
       case "embed":
-        return linkFromData(data.url) ? (
+        return linkFromNotionData(data.url) ? (
           <p class="notion-link">
-            <a href={linkFromData(data.url)} target="_blank" rel="noreferrer">
-              {linkFromData(data.url)}
+            <a
+              href={linkFromNotionData(data.url)}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {linkFromNotionData(data.url)}
             </a>
           </p>
         ) : null;
 
       case "link_preview":
-        return linkFromData(data.url) ? (
+        return linkFromNotionData(data.url) ? (
           <p class="notion-link">
-            <a href={linkFromData(data.url)} target="_blank" rel="noreferrer">
-              {linkFromData(data.url)}
+            <a
+              href={linkFromNotionData(data.url)}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {linkFromNotionData(data.url)}
             </a>
           </p>
         ) : null;
@@ -342,7 +299,10 @@ function youTubeEmbedUrl(value: string): string | undefined {
               const headingText = textFromRichText(heading.data.rich_text);
               const level = heading.type.replace("heading_", "");
               return (
-                <a class={`level-${level}`} href={`#${slugify(headingText)}`}>
+                <a
+                  class={`level-${level}`}
+                  href={`#${notionHeadingId(headingText, heading.id)}`}
+                >
                   {headingText}
                 </a>
               );
@@ -362,322 +322,3 @@ function youTubeEmbedUrl(value: string): string | undefined {
     }
   })()
 }
-
-<style>
-  p,
-  ul,
-  ol,
-  blockquote,
-  pre,
-  figure,
-  details,
-  .notion-link,
-  .notion-file {
-    margin: 0;
-  }
-
-  h2,
-  h3,
-  h4 {
-    margin: 0.75rem 0 0.1rem;
-    line-height: 1.25;
-  }
-
-  h2 {
-    font-size: 1.8rem;
-  }
-
-  h3 {
-    font-size: 1.45rem;
-  }
-
-  h4 {
-    font-size: 1.2rem;
-  }
-
-  blockquote {
-    padding: 0.5rem 1rem;
-    color: var(--muted);
-    border-left: 3px solid var(--accent);
-  }
-
-  .notion-callout {
-    display: flex;
-    gap: 0.6rem;
-    padding: 1rem;
-    border: 1px solid var(--border);
-    background: color-mix(in srgb, var(--border) 20%, transparent);
-  }
-
-  .notion-callout-body {
-    display: grid;
-    flex: 1 1 auto;
-    min-width: 0;
-    gap: 0.75rem;
-  }
-
-  .notion-table-of-contents {
-    display: grid;
-    gap: 0.35rem;
-    padding: 1rem;
-    border-left: 3px solid var(--border);
-  }
-
-  .notion-table-of-contents a {
-    color: var(--muted);
-    text-decoration: none;
-  }
-
-  .notion-table-of-contents .level-2 {
-    padding-left: 1rem;
-  }
-
-  .notion-table-of-contents .level-3 {
-    padding-left: 2rem;
-  }
-
-  .notion-callout-icon {
-    flex: 0 0 auto;
-  }
-
-  .notion-code-shell {
-    position: relative;
-    min-width: 0;
-  }
-
-  .notion-code-copy {
-    position: absolute;
-    z-index: 1;
-    top: 0.65rem;
-    right: 0.75rem;
-    padding: 0.25rem 0.5rem;
-    color: var(--muted);
-    border: 0;
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--background) 76%, transparent);
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    line-height: 1.25;
-    cursor: pointer;
-  }
-
-  .notion-code-copy:hover,
-  .notion-code-copy:focus-visible,
-  .notion-code-copy[data-copied="true"] {
-    color: var(--accent-strong);
-    outline: none;
-  }
-
-  .notion-code-block {
-    overflow-x: auto;
-    padding: 0.875rem 1rem;
-    color: var(--foreground);
-    border: 1px solid var(--border);
-    background: #0d0a16;
-    font-size: 0.9em;
-    line-height: 1.6;
-    scrollbar-color: transparent transparent;
-    scrollbar-width: thin;
-    white-space: pre;
-  }
-
-  .notion-code-block[data-scrolling="true"] {
-    scrollbar-color: color-mix(in srgb, var(--accent) 48%, transparent)
-      transparent;
-  }
-
-  .notion-code-block::-webkit-scrollbar {
-    height: 0.5rem;
-    background: transparent;
-  }
-
-  .notion-code-block::-webkit-scrollbar-track {
-    border: 0;
-    background: transparent;
-  }
-
-  .notion-code-block::-webkit-scrollbar-thumb {
-    border: 0;
-    border-radius: 999px;
-    background: transparent;
-  }
-
-  .notion-code-block[data-scrolling="true"]::-webkit-scrollbar-thumb {
-    background: color-mix(in srgb, var(--accent) 48%, transparent);
-  }
-
-  .notion-image img {
-    display: block;
-    max-width: 100%;
-    height: auto;
-  }
-
-  .notion-video {
-    display: block;
-    max-width: 100%;
-    height: auto;
-    border: 1px solid var(--border);
-  }
-
-  figcaption {
-    margin-top: 0.45rem;
-    color: var(--muted);
-    font-size: 0.9em;
-  }
-
-  li > .notion-blocks {
-    margin-top: 0.5rem;
-    margin-left: 1.2rem;
-  }
-
-  .notion-todo-list {
-    list-style: none;
-    padding-left: 0;
-  }
-
-  .notion-todo-list li {
-    display: flex;
-    gap: 0.5rem;
-    align-items: baseline;
-  }
-
-  .notion-todo-list .is-done :global(.notion-rich-text) {
-    color: var(--muted);
-    text-decoration: line-through;
-  }
-
-  .notion-table-wrap {
-    overflow-x: auto;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  th,
-  td {
-    padding: 0.6rem;
-    border: 1px solid var(--border);
-    vertical-align: top;
-  }
-
-  th {
-    color: var(--accent-strong);
-    background: var(--surface);
-    font-family: var(--font-mono);
-    text-align: left;
-  }
-
-  .notion-columns {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
-    gap: 1rem;
-  }
-
-  .notion-column {
-    display: grid;
-    gap: 2.5rem;
-  }
-
-  li + li {
-    margin-top: 0.55rem;
-  }
-
-  li > .notion-code-shell,
-  li > .notion-image,
-  li > .notion-video,
-  li > .notion-table-wrap,
-  li > details,
-  li > blockquote {
-    margin-top: 0.65rem;
-  }
-
-  .notion-link a,
-  .notion-file a {
-    color: var(--accent);
-  }
-
-  .notion-equation {
-    font-family: var(--font-mono);
-  }
-
-  details {
-    padding: 0.5rem 0;
-  }
-
-  summary {
-    cursor: pointer;
-    font-weight: 700;
-  }
-</style>
-
-<script>
-  const fallbackCopy = (text: string) => {
-    const textarea = document.createElement("textarea");
-    textarea.value = text;
-    textarea.setAttribute("readonly", "");
-    textarea.style.position = "fixed";
-    textarea.style.opacity = "0";
-    document.body.append(textarea);
-    textarea.select();
-    const legacyDocument = document as unknown as {
-      execCommand(commandId: string): boolean;
-    };
-    const copied = legacyDocument.execCommand("copy");
-    textarea.remove();
-    return copied;
-  };
-
-  document.addEventListener("click", async (event) => {
-    const target = event.target;
-    if (!(target instanceof Element)) return;
-
-    const button = target.closest<HTMLButtonElement>("[data-copy-code]");
-    if (!button) return;
-
-    const code = button.nextElementSibling;
-    if (!(code instanceof HTMLPreElement)) return;
-
-    const text = code.textContent ?? "";
-    let copied = false;
-
-    try {
-      await navigator.clipboard.writeText(text);
-      copied = true;
-    } catch {
-      copied = fallbackCopy(text);
-    }
-
-    if (!copied) return;
-
-    button.textContent = "copied";
-    button.dataset.copied = "true";
-    window.setTimeout(() => {
-      button.textContent = "copy";
-      delete button.dataset.copied;
-    }, 1200);
-  });
-
-  const scrollTimers = new WeakMap<Element, number>();
-
-  document.addEventListener(
-    "scroll",
-    (event) => {
-      const target = event.target;
-      if (!(target instanceof HTMLPreElement)) return;
-      if (!target.classList.contains("notion-code-block")) return;
-
-      target.dataset.scrolling = "true";
-      const previousTimer = scrollTimers.get(target);
-      if (previousTimer) window.clearTimeout(previousTimer);
-
-      const timer = window.setTimeout(() => {
-        delete target.dataset.scrolling;
-        scrollTimers.delete(target);
-      }, 700);
-      scrollTimers.set(target, timer);
-    },
-    true,
-  );
-</script>

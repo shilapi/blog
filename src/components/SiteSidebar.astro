@@ -1,0 +1,154 @@
+---
+import { siteConfig } from "../config";
+
+const navigation = [
+  { href: "/", label: "~", current: Astro.url.pathname === "/" },
+  {
+    href: "/posts/",
+    label: "~/Posts",
+    current: Astro.url.pathname.startsWith("/posts"),
+  },
+  {
+    href: "/about/",
+    label: "~/AboutMe",
+    current: Astro.url.pathname === "/about/",
+  },
+];
+---
+
+<header class="site-header">
+  <div class="sidebar-content">
+    <a class="brand" href="/">{siteConfig.brandName}</a>
+
+    <nav class="sidebar-navigation" aria-label="navigator">
+      {
+        navigation.map(({ href, label, current }) => (
+          <a
+            href={href}
+            class:list={{ "is-current": current }}
+            aria-current={current ? "page" : undefined}
+          >
+            <span class="nav-label">
+              <span class="nav-prompt" aria-hidden="true">
+                &gt;
+              </span>
+              {label}
+            </span>
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: fixed;
+    z-index: 10;
+    inset: 0 auto 0 0;
+    width: var(--sidebar-width);
+    border-right: 1px solid var(--border);
+    background: var(--surface);
+    backdrop-filter: blur(18px);
+  }
+
+  .sidebar-content {
+    display: flex;
+    height: 100%;
+    box-sizing: border-box;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 2rem;
+  }
+
+  .brand {
+    color: var(--foreground);
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    text-decoration: none;
+  }
+
+  .sidebar-navigation {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    gap: 0.5em;
+    margin-top: 3.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    line-height: 1.35;
+  }
+
+  .sidebar-navigation a {
+    display: block;
+    padding: 0.2rem 0;
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .nav-label {
+    position: relative;
+    display: inline-block;
+    width: var(--nav-label-width);
+  }
+
+  .nav-prompt {
+    position: absolute;
+    left: calc(-1 * var(--nav-prompt-width));
+    width: var(--nav-prompt-width);
+    color: var(--accent-strong);
+    visibility: hidden;
+  }
+
+  .sidebar-navigation a:hover,
+  .sidebar-navigation a:focus-visible,
+  .sidebar-navigation a.is-current {
+    color: var(--accent-strong);
+    outline: none;
+  }
+
+  .sidebar-navigation a:hover .nav-prompt,
+  .sidebar-navigation a:focus-visible .nav-prompt,
+  .sidebar-navigation a.is-current .nav-prompt {
+    visibility: visible;
+  }
+
+  .sidebar-navigation:has(a:not(.is-current):is(:hover, :focus-visible))
+    a.is-current {
+    color: var(--muted);
+  }
+
+  .sidebar-navigation:has(a:not(.is-current):is(:hover, :focus-visible))
+    a.is-current
+    .nav-prompt {
+    visibility: hidden;
+  }
+
+  @media (max-width: 760px) {
+    .site-header {
+      position: static;
+      width: auto;
+      border-right: 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-content {
+      height: auto;
+      padding: 1rem 1.25rem;
+    }
+
+    .sidebar-navigation {
+      flex-direction: row;
+      gap: 0.5em;
+      margin-top: 1.25rem;
+      overflow-x: auto;
+    }
+
+    .sidebar-navigation a {
+      padding: 0.45rem 0.55rem;
+      white-space: nowrap;
+    }
+  }
+</style>

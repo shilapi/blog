@@ -1,37 +1,21 @@
 ---
-import PostCard from "../../components/PostCard.astro";
+import BackLink from "../../components/BackLink.astro";
+import PostList from "../../components/PostList.astro";
 import Layout from "../../layouts/Layout.astro";
-import { getPosts } from "../../lib/notion";
+import { getPostsByType } from "../../lib/post-routes";
 
-const posts = (await getPosts()).filter((post) => post.type === "Post");
+const posts = await getPostsByType("Post");
 ---
 
 <Layout title="Posts" wideContent>
   <section class="post-archive">
-    <a class="back-link" onclick="window.history.back()">../</a>
+    <div class="archive-back"><BackLink href="/" /></div>
 
     <div class="archive-heading">
       <h1>posts</h1>
     </div>
 
-    {
-      posts.length > 0 ? (
-        <div class="post-grid">
-          {posts.map((post) => (
-            <PostCard
-              slug={post.slug}
-              title={post.title}
-              excerpt={post.excerpt}
-              date={post.date}
-              tags={post.tags}
-              featuredImage={post.featuredImage}
-            />
-          ))}
-        </div>
-      ) : (
-        <p class="empty-state">暂无可公开显示的 Post。</p>
-      )
-    }
+    <PostList posts={posts} emptyMessage="暂无可公开显示的 Post。" />
   </section>
 </Layout>
 
@@ -41,19 +25,8 @@ const posts = (await getPosts()).filter((post) => post.type === "Post");
     padding-block: 56px 80px;
   }
 
-  .back-link {
-    display: inline-block;
+  .archive-back {
     margin-left: var(--post-title-inset);
-    color: var(--muted);
-    font-family: var(--font-mono);
-    font-size: 0.82rem;
-    text-decoration: none;
-    cursor: pointer;
-  }
-
-  .back-link:hover,
-  .back-link:focus-visible {
-    color: var(--accent);
   }
 
   .archive-heading {
@@ -75,19 +48,6 @@ const posts = (await getPosts()).filter((post) => post.type === "Post");
     font-size: clamp(2.5rem, 7vw, 5rem);
     font-weight: 600;
     padding-bottom: 1em;
-  }
-
-  .post-grid {
-    display: grid;
-  }
-
-  .empty-state {
-    margin: 0;
-    padding: 2rem 1.25rem;
-    color: var(--muted);
-    border-inline: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    font-family: var(--font-mono);
   }
 
   @media (max-width: 760px) {

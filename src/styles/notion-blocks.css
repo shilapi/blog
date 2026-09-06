@@ -1,0 +1,179 @@
+.notion-blocks p,
+.notion-blocks ul,
+.notion-blocks ol,
+.notion-blocks blockquote,
+.notion-blocks pre,
+.notion-blocks figure,
+.notion-blocks details,
+.notion-blocks .notion-link,
+.notion-blocks .notion-file {
+  margin: 0;
+}
+
+.notion-blocks h2,
+.notion-blocks h3,
+.notion-blocks h4 {
+  margin: 0.75rem 0 0.1rem;
+  line-height: 1.25;
+}
+
+.notion-blocks h2 {
+  font-size: 1.8rem;
+}
+
+.notion-blocks h3 {
+  font-size: 1.45rem;
+}
+
+.notion-blocks h4 {
+  font-size: 1.2rem;
+}
+
+.notion-blocks blockquote {
+  padding: 0.5rem 1rem;
+  color: var(--muted);
+  border-left: 3px solid var(--accent);
+}
+
+.notion-blocks .notion-callout {
+  display: flex;
+  gap: 0.6rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--border) 20%, transparent);
+}
+
+.notion-blocks .notion-callout-body {
+  display: grid;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 0.75rem;
+}
+
+.notion-blocks .notion-callout-icon {
+  flex: 0 0 auto;
+}
+
+.notion-blocks .notion-table-of-contents {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem;
+  border-left: 3px solid var(--border);
+}
+
+.notion-blocks .notion-table-of-contents a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.notion-blocks .notion-table-of-contents .level-2 {
+  padding-left: 1rem;
+}
+
+.notion-blocks .notion-table-of-contents .level-3 {
+  padding-left: 2rem;
+}
+
+.notion-blocks .notion-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.notion-blocks .notion-video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--border);
+}
+
+.notion-blocks figcaption {
+  margin-top: 0.45rem;
+  color: var(--muted);
+  font-size: 0.9em;
+}
+
+.notion-blocks li > .notion-blocks {
+  margin-top: 0.5rem;
+  margin-left: 1.2rem;
+}
+
+.notion-blocks .notion-todo-list {
+  padding-left: 0;
+  list-style: none;
+}
+
+.notion-blocks .notion-todo-list li {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.notion-blocks .notion-todo-list .is-done .notion-rich-text {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.notion-blocks .notion-table-wrap {
+  overflow-x: auto;
+}
+
+.notion-blocks table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.notion-blocks th,
+.notion-blocks td {
+  padding: 0.6rem;
+  border: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.notion-blocks th {
+  color: var(--accent-strong);
+  background: var(--surface);
+  font-family: var(--font-mono);
+  text-align: left;
+}
+
+.notion-blocks .notion-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.notion-blocks .notion-column {
+  display: grid;
+  gap: 2.5rem;
+}
+
+.notion-blocks li + li {
+  margin-top: 0.55rem;
+}
+
+.notion-blocks li > .notion-image,
+.notion-blocks li > .notion-video,
+.notion-blocks li > .notion-table-wrap,
+.notion-blocks li > details,
+.notion-blocks li > blockquote {
+  margin-top: 0.65rem;
+}
+
+.notion-blocks .notion-link a,
+.notion-blocks .notion-file a {
+  color: var(--accent);
+}
+
+.notion-blocks .notion-equation {
+  font-family: var(--font-mono);
+}
+
+.notion-blocks details {
+  padding: 0.5rem 0;
+}
+
+.notion-blocks summary {
+  cursor: pointer;
+  font-weight: 700;
+}

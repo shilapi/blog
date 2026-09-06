@@ -1,0 +1,38 @@
+---
+interface Props {
+  href: string;
+}
+
+const { href } = Astro.props;
+---
+
+<a class="back-link" href={href} data-history-back>../</a>
+
+<script>
+  document.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    const link = target.closest<HTMLAnchorElement>("[data-history-back]");
+    if (!link || window.history.length <= 1) return;
+
+    event.preventDefault();
+    window.history.back();
+  });
+</script>
+
+<style>
+  .back-link {
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .back-link:hover,
+  .back-link:focus-visible {
+    color: var(--accent);
+    outline: none;
+  }
+</style>

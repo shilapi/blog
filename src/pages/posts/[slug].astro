@@ -1,15 +1,10 @@
 ---
 import ArticleDetail from "../../components/ArticleDetail.astro";
 import type { Post } from "../../data/posts";
-import { getPosts } from "../../lib/notion";
+import { getArticleStaticPaths } from "../../lib/post-routes";
 
 export async function getStaticPaths() {
-  const posts = (await getPosts()).filter((post) => post.type === "Post");
-
-  return posts.map((post) => ({
-    params: { slug: post.slug },
-    props: { post },
-  }));
+  return getArticleStaticPaths("Post");
 }
 
 interface Props {

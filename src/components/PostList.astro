@@ -1,0 +1,47 @@
+---
+import type { Post } from "../data/posts";
+import PostCard from "./PostCard.astro";
+
+interface Props {
+  posts: Post[];
+  emptyMessage?: string;
+  bordered?: boolean;
+}
+
+const {
+  posts,
+  emptyMessage = "暂无可公开显示的文章。",
+  bordered = false,
+} = Astro.props;
+---
+
+{
+  posts.length > 0 ? (
+    <div class:list={["post-grid", { "has-border": bordered }]}>
+      {posts.map((post) => (
+        <PostCard post={post} />
+      ))}
+    </div>
+  ) : (
+    <p class="empty-state">{emptyMessage}</p>
+  )
+}
+
+<style>
+  .post-grid {
+    display: grid;
+  }
+
+  .post-grid.has-border {
+    border-inline: 1px solid var(--border);
+  }
+
+  .empty-state {
+    margin: 0;
+    padding: 2rem 1.25rem;
+    color: var(--muted);
+    border-inline: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-mono);
+  }
+</style>

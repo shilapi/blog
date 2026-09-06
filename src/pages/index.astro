@@ -1,5 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import JumpTile from "../components/JumpTile.astro";
 import { serviceLinks, siteConfig } from "../config";
 
 const sections = [
@@ -43,31 +44,7 @@ const sections = [
 
           <div class="link-grid">
             {section.links.length > 0 ? (
-              section.links.map((link) => {
-                const isExternal = /^https?:\/\//.test(link.href);
-
-                return (
-                  <div class="jump-hitbox" data-interactive-tile-hitbox>
-                    <a
-                      class="jump-block"
-                      data-interactive-tile
-                      href={link.href}
-                      target={isExternal ? "_blank" : undefined}
-                      rel={isExternal ? "noreferrer" : undefined}
-                    >
-                      <span class="jump-path">
-                        <span class="jump-prompt" aria-hidden="true">
-                          &gt;
-                        </span>
-                        {link.label}
-                      </span>
-                      {link.description && (
-                        <span class="jump-description">{link.description}</span>
-                      )}
-                    </a>
-                  </div>
-                );
-              })
+              section.links.map((link) => <JumpTile link={link} />)
             ) : (
               <p class="empty-services">[no services configured]</p>
             )}
@@ -138,42 +115,6 @@ const sections = [
   .link-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .jump-block {
-    display: flex;
-    min-height: 8.5rem;
-    box-sizing: border-box;
-    flex-direction: column;
-    padding: 1.25rem var(--home-content-inset);
-    color: var(--foreground);
-    font-family: var(--font-mono);
-    text-decoration: none;
-  }
-
-  .jump-path {
-    display: block;
-    font-size: 0.92rem;
-    font-weight: 600;
-  }
-
-  .jump-prompt {
-    position: absolute;
-    right: calc(100% + 1ch);
-    color: var(--accent);
-    opacity: 0;
-  }
-
-  .jump-hitbox[data-tile-pointer-active] .jump-prompt,
-  .jump-hitbox:focus-within .jump-prompt {
-    opacity: 1;
-  }
-
-  .jump-description {
-    margin: 0.8rem 0 1.5rem;
-    color: var(--muted);
-    font-size: 0.76rem;
-    line-height: 1.6;
   }
 
   .empty-services {

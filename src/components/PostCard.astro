@@ -1,20 +1,19 @@
 ---
+import type { Post } from "../data/posts";
+import { postHref } from "../lib/post-routes";
+
 interface Props {
-  slug: string;
-  title: string;
-  excerpt: string;
-  date: string;
-  tags: string[];
-  featuredImage?: string;
+  post: Post;
 }
 
-const { slug, title, excerpt, date, tags, featuredImage } = Astro.props;
+const { post } = Astro.props;
+const { title, excerpt, date, tags, featuredImage } = post;
 ---
 
 <div class="post-card-hitbox" data-interactive-tile-hitbox>
   <a
     class="post-card-hit-target"
-    href={`/posts/${slug}/`}
+    href={postHref(post)}
     aria-label={`阅读文章：${title}`}></a>
 
   <article class="post-card" data-interactive-tile>

@@ -21,6 +21,6 @@ export const serviceLinks = [
   {
     label: "Surge Config Editor",
     href: "https://surgeconfig.lapiw.icu/",
-    description: "Config editor for surge, a proxy tool."
-  }
+    description: "Config editor for surge, a proxy tool.",
+  },
 ] satisfies ServiceLink[];

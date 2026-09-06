@@ -1,26 +1,26 @@
 ---
+import BackLink from "../../../components/BackLink.astro";
+import PostList from "../../../components/PostList.astro";
+import type { Post } from "../../../data/posts";
 import Layout from "../../../layouts/Layout.astro";
-import PostCard from "../../../components/PostCard.astro";
-import { getPosts } from "../../../lib/notion";
+import { getPostTagStaticPaths } from "../../../lib/post-routes";
 
 export async function getStaticPaths() {
-  const posts = (await getPosts()).filter((post) => post.type === "Post");
-  const tags = [...new Set(posts.flatMap((post) => post.tags))].sort((a, b) =>
-    a.localeCompare(b),
-  );
-  return tags.map((tag) => ({
-    params: { tag },
-    props: { posts: posts.filter((post) => post.tags.includes(tag)) },
-  }));
+  return getPostTagStaticPaths();
 }
 
 const { tag } = Astro.params;
+
+interface Props {
+  posts: Post[];
+}
+
 const { posts } = Astro.props;
 ---
 
 <Layout title={`标签：${tag ?? ""}`}>
   <section class="tag-archive">
-    <a class="back-link" onclick="window.history.back()">../</a>
+    <BackLink href="/posts/" />
 
     <div class="archive-heading">
       <h1>~/tags/{tag}</h1>
@@ -28,20 +28,7 @@ const { posts } = Astro.props;
     </div>
     <p class="archive-count">{posts.length} entries</p>
 
-    <div class="post-grid">
-      {
-        posts.map((post) => (
-          <PostCard
-            slug={post.slug}
-            title={post.title}
-            excerpt={post.excerpt}
-            date={post.date}
-            tags={post.tags}
-            featuredImage={post.featuredImage}
-          />
-        ))
-      }
-    </div>
+    <PostList posts={posts} bordered />
     <p class="archive-ending" aria-hidden="true">└─</p>
   </section>
 </Layout>
@@ -49,14 +36,6 @@ const { posts } = Astro.props;
 <style>
   .tag-archive {
     padding-block: 56px 80px;
-  }
-
-  .back-link {
-    color: var(--muted);
-    font-family: var(--font-mono);
-    font-size: 0.82rem;
-    text-decoration: none;
-    cursor: pointer;
   }
 
   .archive-heading {
@@ -94,10 +73,5 @@ const { posts } = Astro.props;
   .archive-count {
     padding: 1.25rem;
     border-left: 1px solid var(--border);
-  }
-
-  .post-grid {
-    display: grid;
-    border-inline: 1px solid var(--border);
   }
 </style>
