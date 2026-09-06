@@ -60,16 +60,18 @@ Token 只放在本地 `.env` 或 Cloudflare 的环境变量中，不要提交到
 
 默认支持的图片/文件策略是“构建时下载”。Notion 托管的文件 URL 只有短期有效期，所以不能直接把它当长期静态资源；构建钩子会把下载结果复制到 `dist/notion`。可选地设置 `NOTION_BLOCK_CACHE=true` 使用 `tmp/` 中的 Block 缓存（默认关闭，保证每次构建读取最新内容）。
 
-## Cloudflare Pages
+## Cloudflare Workers
 
-在 Pages 项目中设置：
+本站使用 Astro 静态输出，由 `wrangler.jsonc` 将构建后的 `dist` 作为 Workers Static Assets 部署，不需要 `@astrojs/cloudflare` adapter。
+
+在 Workers Builds 项目中设置：
 
 - Build command：`npm run build`
-- Output directory：`dist`
+- Deploy command：`npx wrangler deploy`
 - Environment variables：`NOTION_TOKEN`、`NOTION_DATA_SOURCE_ID`
 - Node.js：`22.12.0` 或更高
 
-这是静态部署；Notion 内容更新后需要触发一次新的构建。Git 集成可以在每次推送后自动部署。
+这是静态部署；Notion 内容更新后需要触发一次新的构建。Git 集成可以在每次推送后自动部署。本地可运行 `npm run deploy` 完成构建并部署，或用 `npx wrangler deploy --dry-run` 只验证部署包。
 
 ## Contributor
 
