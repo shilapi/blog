@@ -30,6 +30,7 @@ const {
 <style>
   .post-grid {
     display: grid;
+    grid-auto-rows: 1fr;
   }
 
   .post-grid.has-border {
@@ -43,5 +44,11 @@ const {
     border-inline: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
     font-family: var(--font-mono);
+  }
+
+  @media (max-width: 760px) {
+    .post-grid {
+      grid-auto-rows: auto;
+    }
   }
 </style>

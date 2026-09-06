@@ -36,10 +36,6 @@ const { title, excerpt, date, tags, featuredImage } = post;
       </ul>
     </div>
 
-    <p class="post-date">
-      <time datetime={date}>{date}</time>
-    </p>
-
     {
       featuredImage && (
         <div class="featured-image">
@@ -47,6 +43,10 @@ const { title, excerpt, date, tags, featuredImage } = post;
         </div>
       )
     }
+
+    <p class="post-date">
+      <time datetime={date}>{date}</time>
+    </p>
   </article>
 </div>
 
@@ -54,7 +54,7 @@ const { title, excerpt, date, tags, featuredImage } = post;
   .post-card {
     z-index: 2;
     display: grid;
-    grid-template-columns: 0.625rem minmax(0, 1fr) max-content 9rem;
+    grid-template-columns: 0.625rem minmax(0, 1fr) 9rem max-content;
     gap: 1rem;
     align-items: start;
     padding: 1.25rem;
@@ -85,13 +85,14 @@ const { title, excerpt, date, tags, featuredImage } = post;
   }
 
   .post-date {
-    margin: 0.25rem 0 0;
+    margin: 0.25rem 1rem 0;
     color: var(--muted);
     font-family: var(--font-mono);
     font-size: 0.875rem;
     justify-self: end;
     pointer-events: none;
     white-space: nowrap;
+    grid-column: 4;
   }
 
   .post-body {
@@ -116,6 +117,7 @@ const { title, excerpt, date, tags, featuredImage } = post;
     display: block;
     width: 9rem;
     pointer-events: none;
+    grid-column: 3;
   }
 
   .featured-image img {
