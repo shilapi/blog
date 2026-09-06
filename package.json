@@ -12,11 +12,12 @@
     "check": "astro check",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "astro": "astro"
+    "astro": "astro",
+    "generate-types": "wrangler types"
   },
   "dependencies": {
     "@notionhq/client": "^5.26.0",
-    "astro": "^7.2.6",
+    "astro": "^7.3.1",
     "heic-convert": "^2.1.0",
     "sharp": "^0.35.4"
   },
