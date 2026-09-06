@@ -1,7 +1,11 @@
 ---
 import type { Post } from "../data/posts";
+import { siteConfig } from "../config";
 import { getPageBlocks } from "../lib/notion";
+import { notionHeadingEntries } from "../lib/notion-render";
+import { ogImageKey } from "../lib/og";
 import Layout from "../layouts/Layout.astro";
+import ArticleToc from "./ArticleToc.astro";
 import NotionBlocks from "./NotionBlocks.astro";
 import PageHeading from "./PageHeading.astro";
 import PostTags from "./PostTags.astro";
@@ -12,9 +16,16 @@ interface Props {
 
 const { post } = Astro.props;
 const blocks = post.sourceId ? await getPageBlocks(post.sourceId) : [];
+const tocEntries = notionHeadingEntries(blocks);
 ---
 
-<Layout title={post.title} description={post.excerpt} wideContent>
+<Layout
+  title={post.title}
+  description={post.excerpt || siteConfig.description}
+  ogImage={`/og/${ogImageKey(post)}.png`}
+  ogType="article"
+  wideContent
+>
   <article class="post-detail">
     <PageHeading
       title={post.title}
@@ -51,6 +62,7 @@ const blocks = post.sourceId ? await getPageBlocks(post.sourceId) : [];
       )
     }
   </article>
+  <ArticleToc entries={tocEntries} />
 </Layout>
 
 <style>

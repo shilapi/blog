@@ -1,0 +1,121 @@
+---
+import type { BookmarkPreview } from "../lib/notion/types";
+
+interface Props {
+  url: string;
+  preview: BookmarkPreview;
+}
+
+const { url, preview } = Astro.props;
+---
+
+<div class="bookmark-hitbox" data-interactive-tile-hitbox>
+  <a
+    class="bookmark-tile"
+    data-interactive-tile
+    href={url}
+    target="_blank"
+    rel="noreferrer noopener"
+    aria-label={`打开外部书签：${preview.title}`}
+  >
+    <span class="bookmark-title">{preview.title}</span>
+    <span class="bookmark-description">{preview.description}</span>
+    <span class="bookmark-site">
+      <img src={preview.faviconUrl} alt="" loading="lazy" />
+      <span class="bookmark-hostname">{preview.hostname}</span>
+    </span>
+  </a>
+</div>
+
+<style>
+  .bookmark-hitbox {
+    width: 100%;
+    margin: 0.75rem 0;
+  }
+
+  .bookmark-tile {
+    display: flex;
+    min-height: 15rem;
+    padding: 1.5rem 1.65rem;
+    flex-direction: column;
+    color: var(--foreground);
+    font-family: var(--font-mono);
+    text-decoration: none;
+  }
+
+  .bookmark-title {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: clamp(1.35rem, 3vw, 2rem);
+    font-weight: 600;
+    line-height: 1.25;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .bookmark-description {
+    display: -webkit-box;
+    overflow: hidden;
+    max-width: 52rem;
+    margin-top: 0.7rem;
+    color: var(--muted);
+    font-family: "Pretendard", var(--font-sans);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    transition: color 140ms ease;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .bookmark-site {
+    display: flex;
+    margin-top: auto;
+    padding-top: 1.5rem;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .bookmark-icon-frame {
+    display: grid;
+    width: 2.75rem;
+    height: 2.75rem;
+    flex: 0 0 2.75rem;
+    place-items: center;
+    border: 1px solid var(--foreground);
+    border-radius: 0.45rem;
+  }
+
+  .bookmark-icon-frame img {
+    display: block;
+    width: 1.55rem;
+    height: 1.55rem;
+    object-fit: contain;
+  }
+
+  .bookmark-hostname {
+    overflow: hidden;
+    color: var(--muted);
+    font-size: 0.75rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .bookmark-hitbox:is([data-tile-pointer-active], :focus-within)
+    .bookmark-title {
+    color: var(--accent-strong);
+  }
+
+  .bookmark-hitbox:is([data-tile-pointer-active], :focus-within)
+    .bookmark-description,
+  .bookmark-hitbox:is([data-tile-pointer-active], :focus-within)
+    .bookmark-hostname {
+    color: var(--foreground);
+  }
+
+  @media (max-width: 640px) {
+    .bookmark-tile {
+      min-height: 12rem;
+      padding: 1.25rem 1rem;
+    }
+  }
+</style>

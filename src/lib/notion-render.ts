@@ -1,5 +1,11 @@
 import type { NotionBlock } from "./notion";
-import { asRecord } from "./notion/shared";
+import { asRecord, textFromRichText } from "./notion/shared";
+
+export interface NotionHeadingEntry {
+  id: string;
+  text: string;
+  level: 1 | 2;
+}
 
 export function groupNotionLists(blocks: NotionBlock[]): NotionBlock[] {
   const grouped: NotionBlock[] = [];
@@ -38,19 +44,39 @@ export function groupNotionLists(blocks: NotionBlock[]): NotionBlock[] {
 }
 
 export function notionHeadings(blocks: NotionBlock[]): NotionBlock[] {
-  return blocks.filter((block) =>
-    ["heading_1", "heading_2", "heading_3"].includes(block.type),
-  );
+  return blocks.flatMap((block) => [
+    ...(["heading_1", "heading_2", "heading_3"].includes(block.type)
+      ? [block]
+      : []),
+    ...(block.children ? notionHeadings(block.children) : []),
+  ]);
 }
 
 export function notionHeadingId(value: string, fallbackId: string): string {
-  return (
-    value
-      .toLowerCase()
-      .trim()
-      .replace(/[^\p{Letter}\p{Number}]+/gu, "-")
-      .replace(/^-+|-+$/g, "") || fallbackId
-  );
+  const slug = value
+    .toLowerCase()
+    .trim()
+    .replace(/[^\p{Letter}\p{Number}]+/gu, "-")
+    .replace(/^-+|-+$/g, "");
+  const stableSuffix = fallbackId.replace(/[^a-z0-9]/gi, "").slice(0, 8);
+  return [slug || "section", stableSuffix].filter(Boolean).join("-");
+}
+
+export function notionHeadingEntries(
+  blocks: NotionBlock[],
+): NotionHeadingEntry[] {
+  return notionHeadings(blocks).flatMap((block) => {
+    if (block.type !== "heading_1" && block.type !== "heading_2") return [];
+    const text = textFromRichText(block.data.rich_text).trim();
+    if (!text) return [];
+    return [
+      {
+        id: notionHeadingId(text, block.id),
+        text,
+        level: block.type === "heading_1" ? 1 : 2,
+      } satisfies NotionHeadingEntry,
+    ];
+  });
 }
 
 export function linkFromNotionData(value: unknown): string {

@@ -7,7 +7,12 @@ import { getPostsByType } from "../../lib/post-routes";
 const posts = await getPostsByType("Post");
 ---
 
-<Layout title="Posts" wideContent>
+<Layout
+  title="Posts"
+  description="All posts."
+  ogImage="/og/posts.png"
+  wideContent
+>
   <section class="post-archive">
     <PageHeading title="posts" backHref="/" />
 

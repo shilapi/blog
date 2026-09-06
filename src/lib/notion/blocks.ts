@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { getBookmarkPreview } from "./bookmarks";
 import { notion, requestNotion } from "./client";
 import { persistFile } from "./media";
 import { asRecord } from "./shared";
@@ -97,6 +98,10 @@ async function buildBlockTree(
         block.type === "pdf"
       ) {
         block.assetUrl = await persistFile(block.id, block.data);
+      }
+
+      if (block.type === "bookmark" || block.type === "link_preview") {
+        block.bookmarkPreview = await getBookmarkPreview(block.data);
       }
 
       if (block.hasChildren) {

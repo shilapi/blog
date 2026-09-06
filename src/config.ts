@@ -1,4 +1,5 @@
 export const siteConfig = {
+  siteUrl: "https://lapiw.icu",
   siteName: "Shilapi's blog",
   brandName: "shilapi@blog",
   description: "Shilapi's blog, where shit posts happpen.",

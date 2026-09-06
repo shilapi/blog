@@ -1,0 +1,240 @@
+---
+import type { NotionHeadingEntry } from "../lib/notion-render";
+
+interface Props {
+  entries: NotionHeadingEntry[];
+}
+
+const { entries } = Astro.props;
+const hasHeadingOne = entries.some((entry) => entry.level === 1);
+---
+
+{
+  entries.length > 0 && (
+    <nav
+      class:list={["article-toc", { "has-heading-one": hasHeadingOne }]}
+      aria-label="文章目录"
+      data-article-toc
+    >
+      <ol>
+        {entries.map((entry) => (
+          <li>
+            <a
+              href={`#${entry.id}`}
+              class:list={{ "is-secondary": entry.level === 2 }}
+              data-toc-entry
+            >
+              <span class="toc-dot" aria-hidden="true" />
+              <span
+                class="toc-label"
+                style={`--toc-steps: ${Math.max(entry.text.length, 1)}`}
+              >
+                {entry.text}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  )
+}
+
+<script>
+  document
+    .querySelectorAll<HTMLElement>("[data-article-toc]")
+    .forEach((toc) => {
+      const article = document.querySelector<HTMLElement>(".post-detail");
+      const entries = Array.from(
+        toc.querySelectorAll<HTMLAnchorElement>("[data-toc-entry]"),
+      );
+      const reducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      );
+      if (!article || entries.length === 0) return;
+
+      const headings = entries.map((entry) => {
+        const id = decodeURIComponent(entry.hash.slice(1));
+        return document.getElementById(id);
+      });
+      let progressFrame = 0;
+      let layoutFrame = 0;
+
+      const measure = () => {
+        cancelAnimationFrame(layoutFrame);
+        layoutFrame = requestAnimationFrame(() => {
+          const labels = entries.map((entry) =>
+            entry.querySelector<HTMLElement>(".toc-label"),
+          );
+          const widest = Math.ceil(
+            Math.max(
+              ...labels.map((label) =>
+                label
+                  ? label.scrollWidth +
+                    Number.parseFloat(getComputedStyle(label).marginLeft || "0")
+                  : 0,
+              ),
+            ),
+          );
+          const articleRight = article.getBoundingClientRect().right;
+          const gap = 32;
+          const viewportPadding = 24;
+          const available =
+            window.innerWidth - articleRight - gap - viewportPadding;
+
+          toc.style.setProperty("--toc-width", `${widest}px`);
+          toc.style.left = `${Math.ceil(articleRight + gap)}px`;
+          toc.toggleAttribute(
+            "data-ready",
+            widest > 0 && available >= widest && window.innerWidth >= 1100,
+          );
+        });
+      };
+
+      const updateProgress = () => {
+        cancelAnimationFrame(progressFrame);
+        progressFrame = requestAnimationFrame(() => {
+          const readingLine = Math.min(window.innerHeight * 0.62, 620);
+          let latestPassed = -1;
+
+          headings.forEach((heading, index) => {
+            const passed = Boolean(
+              heading && heading.getBoundingClientRect().top <= readingLine,
+            );
+            entries[index].classList.toggle("is-passed", passed);
+            entries[index].removeAttribute("aria-current");
+            if (passed) latestPassed = index;
+          });
+          if (latestPassed >= 0) {
+            entries[latestPassed].setAttribute("aria-current", "location");
+          }
+        });
+      };
+
+      entries.forEach((entry, index) => {
+        entry.addEventListener("click", (event) => {
+          const heading = headings[index];
+          if (!heading) return;
+          event.preventDefault();
+          heading.scrollIntoView({
+            behavior: reducedMotion.matches ? "auto" : "smooth",
+            block: "start",
+          });
+          history.replaceState(null, "", entry.hash);
+        });
+      });
+
+      measure();
+      updateProgress();
+      window.addEventListener("resize", measure, { passive: true });
+      window.addEventListener("resize", updateProgress, { passive: true });
+      window.addEventListener("scroll", updateProgress, { passive: true });
+    });
+</script>
+
+<style>
+  .article-toc {
+    --toc-width: 0px;
+    position: fixed;
+    z-index: 5;
+    top: 50%;
+    display: block;
+    overflow-y: auto;
+    width: var(--toc-width);
+    max-height: calc(100vh - 4rem);
+    padding-block: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 1.35;
+    scrollbar-width: none;
+    transform: translateY(-50%);
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .article-toc[data-ready] {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .article-toc::-webkit-scrollbar {
+    display: none;
+  }
+
+  ol,
+  li {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  a {
+    --entry-indent: 0px;
+    position: relative;
+    display: block;
+    width: 100%;
+    min-height: 1.35rem;
+    color: var(--border);
+    outline: none;
+    text-decoration: none;
+    transition: color 120ms ease;
+  }
+
+  .has-heading-one a.is-secondary {
+    --entry-indent: 1rem;
+  }
+
+  a.is-passed {
+    color: var(--accent-strong);
+  }
+
+  .toc-dot {
+    position: absolute;
+    top: 40%;
+    left: var(--entry-indent);
+    width: 0.34rem;
+    height: 0.34rem;
+    border-radius: 50%;
+    background: currentcolor;
+    opacity: 1;
+    transform: translateY(-50%);
+    transition: opacity 140ms ease;
+  }
+
+  .toc-label {
+    display: block;
+    overflow: hidden;
+    width: max-content;
+    max-width: none;
+    margin-left: var(--entry-indent);
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+    white-space: nowrap;
+    transition:
+      clip-path 300ms steps(var(--toc-steps), end),
+      opacity 80ms linear;
+  }
+
+  .article-toc:is(:hover, :focus-within) .toc-dot {
+    opacity: 0;
+  }
+
+  .article-toc:is(:hover, :focus-within) .toc-label {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+
+  a:focus-visible .toc-label {
+    color: var(--foreground);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .toc-dot,
+    .toc-label {
+      transition: none;
+    }
+  }
+</style>
