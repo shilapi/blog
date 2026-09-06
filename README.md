@@ -1,6 +1,6 @@
-# Astro + Notion Blog
+# shilapi's blog
 
-这是一个静态 Astro 博客：构建时从 Notion Data Source 读取文章和 Block，生成 HTML，并把 Notion 临时媒体 URL 下载到最终站点的 `/notion/` 目录。
+这是一个静态 Astro 博客，以 notion 作为内容管理平台。
 
 ## 本地运行
 
@@ -70,3 +70,7 @@ Token 只放在本地 `.env` 或 Cloudflare 的环境变量中，不要提交到
 - Node.js：`22.12.0` 或更高
 
 这是静态部署；Notion 内容更新后需要触发一次新的构建。Git 集成可以在每次推送后自动部署。
+
+## Contributor
+
+Thanks for GPT5.6 & CodeX.
