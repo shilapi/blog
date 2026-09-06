@@ -1,0 +1,103 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import PostCard from "../../../components/PostCard.astro";
+import { getPosts } from "../../../lib/notion";
+
+export async function getStaticPaths() {
+  const posts = (await getPosts()).filter((post) => post.type === "Post");
+  const tags = [...new Set(posts.flatMap((post) => post.tags))].sort((a, b) =>
+    a.localeCompare(b),
+  );
+  return tags.map((tag) => ({
+    params: { tag },
+    props: { posts: posts.filter((post) => post.tags.includes(tag)) },
+  }));
+}
+
+const { tag } = Astro.params;
+const { posts } = Astro.props;
+---
+
+<Layout title={`标签：${tag ?? ""}`}>
+  <section class="tag-archive">
+    <a class="back-link" onclick="window.history.back()">../</a>
+
+    <div class="archive-heading">
+      <h1>~/tags/{tag}</h1>
+      <span class="archive-rule" aria-hidden="true"></span>
+    </div>
+    <p class="archive-count">{posts.length} entries</p>
+
+    <div class="post-grid">
+      {
+        posts.map((post) => (
+          <PostCard
+            slug={post.slug}
+            title={post.title}
+            excerpt={post.excerpt}
+            date={post.date}
+            tags={post.tags}
+            featuredImage={post.featuredImage}
+          />
+        ))
+      }
+    </div>
+    <p class="archive-ending" aria-hidden="true">└─</p>
+  </section>
+</Layout>
+
+<style>
+  .tag-archive {
+    padding-block: 56px 80px;
+  }
+
+  .back-link {
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .archive-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.65ch;
+    margin-top: 3rem;
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    line-height: 1;
+  }
+
+  .archive-rule {
+    height: 1px;
+    flex: 1;
+    background: var(--border-strong);
+  }
+
+  h1 {
+    margin: 0;
+    color: var(--foreground);
+    font: inherit;
+    font-weight: 600;
+  }
+
+  .archive-count,
+  .archive-ending {
+    margin: 0;
+    color: var(--subtle);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+  }
+
+  .archive-count {
+    padding: 1.25rem;
+    border-left: 1px solid var(--border);
+  }
+
+  .post-grid {
+    display: grid;
+    border-inline: 1px solid var(--border);
+  }
+</style>

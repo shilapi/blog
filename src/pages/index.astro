@@ -1,17 +1,206 @@
 ---
+import Layout from "../layouts/Layout.astro";
+import { serviceLinks, siteConfig } from "../config";
 
+const sections = [
+  {
+    title: "localhost",
+    links: [
+      {
+        label: "~/posts",
+        href: "/posts/",
+        description: "All posts.",
+      },
+      {
+        label: "~/aboutme",
+        href: "/about/",
+        description: "About me, yes it's about me.",
+      },
+    ],
+  },
+  { title: "services", links: serviceLinks },
+];
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout showSidebar={false}>
+  <section id="about" class="hero">
+    <div class="hero-content">
+      <h1>{siteConfig.brandName}</h1>
+      <p class="description">{siteConfig.description}</p>
+    </div>
+  </section>
+
+  <div class="link-sections">
+    {
+      sections.map((section) => (
+        <section
+          class="link-section"
+          aria-labelledby={`${section.title}-title`}
+        >
+          <div class="ascii-heading section-heading">
+            <h2 id={`${section.title}-title`}>{section.title}</h2>
+          </div>
+
+          <div class="link-grid">
+            {section.links.length > 0 ? (
+              section.links.map((link) => {
+                const isExternal = /^https?:\/\//.test(link.href);
+
+                return (
+                  <div class="jump-hitbox" data-interactive-tile-hitbox>
+                    <a
+                      class="jump-block"
+                      data-interactive-tile
+                      href={link.href}
+                      target={isExternal ? "_blank" : undefined}
+                      rel={isExternal ? "noreferrer" : undefined}
+                    >
+                      <span class="jump-path">
+                        <span class="jump-prompt" aria-hidden="true">
+                          &gt;
+                        </span>
+                        {link.label}
+                      </span>
+                      {link.description && (
+                        <span class="jump-description">{link.description}</span>
+                      )}
+                    </a>
+                  </div>
+                );
+              })
+            ) : (
+              <p class="empty-services">[no services configured]</p>
+            )}
+          </div>
+        </section>
+      ))
+    }
+  </div>
+</Layout>
+
+<style>
+  .hero {
+    --home-content-inset: 2rem;
+    padding-block: 72px 64px;
+  }
+
+  .ascii-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.65ch;
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    line-height: 1;
+  }
+
+  .hero-content {
+    padding: 3.5rem var(--home-content-inset) 3rem;
+  }
+
+  h1 {
+    max-width: 760px;
+    margin: 1rem 0 0.9rem;
+    font-family: var(--font-mono);
+    font-size: clamp(2.5rem, 7vw, 5rem);
+    line-height: 1;
+    letter-spacing: -0.055em;
+  }
+
+  .description {
+    max-width: 600px;
+    color: var(--muted);
+    font-size: 1.08rem;
+    line-height: 1.7;
+  }
+
+  .link-sections {
+    --home-content-inset: 2rem;
+    display: grid;
+    gap: 3.5rem;
+    padding-block: 24px 80px;
+  }
+
+  .link-section {
+    min-width: 0;
+  }
+
+  .section-heading h2 {
+    margin: 0;
+    padding-left: var(--home-content-inset);
+    color: var(--foreground);
+    font: inherit;
+    font-weight: 600;
+    font-size: 1.5em;
+    padding-bottom: 1em;
+  }
+
+  .link-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .jump-block {
+    display: flex;
+    min-height: 8.5rem;
+    box-sizing: border-box;
+    flex-direction: column;
+    padding: 1.25rem var(--home-content-inset);
+    color: var(--foreground);
+    font-family: var(--font-mono);
+    text-decoration: none;
+  }
+
+  .jump-path {
+    display: block;
+    font-size: 0.92rem;
+    font-weight: 600;
+  }
+
+  .jump-prompt {
+    position: absolute;
+    right: calc(100% + 1ch);
+    color: var(--accent);
+    opacity: 0;
+  }
+
+  .jump-hitbox[data-tile-pointer-active] .jump-prompt,
+  .jump-hitbox:focus-within .jump-prompt {
+    opacity: 1;
+  }
+
+  .jump-description {
+    margin: 0.8rem 0 1.5rem;
+    color: var(--muted);
+    font-size: 0.76rem;
+    line-height: 1.6;
+  }
+
+  .empty-services {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 2rem 1.25rem;
+    color: var(--subtle);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+  }
+
+  @media (max-width: 640px) {
+    .hero,
+    .link-sections {
+      --home-content-inset: 1rem;
+    }
+
+    .hero {
+      padding-block: 48px 40px;
+    }
+
+    .hero-content {
+      padding-block: 2.5rem 2rem;
+    }
+
+    .link-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

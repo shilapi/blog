@@ -1,0 +1,22 @@
+---
+import ArticleDetail from "../../components/ArticleDetail.astro";
+import type { Post } from "../../data/posts";
+import { getPosts } from "../../lib/notion";
+
+export async function getStaticPaths() {
+  const posts = (await getPosts()).filter((post) => post.type === "Post");
+
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+---
+
+<ArticleDetail post={post} />

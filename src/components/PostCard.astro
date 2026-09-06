@@ -1,0 +1,180 @@
+---
+interface Props {
+  slug: string;
+  title: string;
+  excerpt: string;
+  date: string;
+  tags: string[];
+  featuredImage?: string;
+}
+
+const { slug, title, excerpt, date, tags, featuredImage } = Astro.props;
+---
+
+<div class="post-card-hitbox" data-interactive-tile-hitbox>
+  <a
+    class="post-card-hit-target"
+    href={`/posts/${slug}/`}
+    aria-label={`阅读文章：${title}`}></a>
+
+  <article class="post-card" data-interactive-tile>
+    <span class="row-marker" aria-hidden="true">&gt;</span>
+
+    <div class="post-body">
+      <h3>{title}</h3>
+      {excerpt && <p class="excerpt">{excerpt}</p>}
+
+      <ul class="tags">
+        {
+          tags.map((tag) => (
+            <li>
+              <span aria-hidden="true">[</span>
+              <a href={`/posts/tag/${encodeURIComponent(tag)}/`}>{tag}</a>
+              <span aria-hidden="true">]</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <p class="post-date">
+      <time datetime={date}>{date}</time>
+    </p>
+
+    {
+      featuredImage && (
+        <div class="featured-image">
+          <img src={featuredImage} alt={`文章配图：${title}`} loading="lazy" />
+        </div>
+      )
+    }
+  </article>
+</div>
+
+<style>
+  .post-card {
+    z-index: 2;
+    display: grid;
+    grid-template-columns: 0.625rem minmax(0, 1fr) max-content 9rem;
+    gap: 1rem;
+    align-items: start;
+    padding: 1.25rem;
+    pointer-events: none;
+  }
+
+  .post-card-hit-target {
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    outline: none;
+  }
+
+  .row-marker {
+    display: grid;
+    height: 1.8125rem;
+    place-items: center;
+    color: var(--accent-strong);
+    font-family: var(--font-mono);
+    line-height: 1;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .post-card-hitbox[data-tile-pointer-active] .row-marker,
+  .post-card-hitbox:focus-within .row-marker {
+    opacity: 1;
+  }
+
+  .post-date {
+    margin: 0.25rem 0 0;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    justify-self: end;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .post-body {
+    min-width: 0;
+    position: static;
+  }
+
+  h3 {
+    margin: 0;
+    color: var(--foreground);
+    font-size: 1.25rem;
+    line-height: 1.45;
+    transition: color 140ms ease;
+  }
+
+  .post-card-hitbox[data-tile-pointer-active] h3,
+  .post-card-hitbox:focus-within h3 {
+    color: var(--accent);
+  }
+
+  .featured-image {
+    display: block;
+    width: 9rem;
+    pointer-events: none;
+  }
+
+  .featured-image img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    border: 1px solid var(--border);
+    object-fit: cover;
+  }
+
+  .excerpt {
+    margin: 0.55rem 0 0;
+    color: var(--muted);
+    font-size: 0.92rem;
+    line-height: 1.65;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 0.75rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .tags li {
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+  }
+
+  .tags a {
+    position: relative;
+    z-index: 3;
+    color: inherit;
+    pointer-events: auto;
+    text-decoration: none;
+  }
+
+  @media (max-width: 760px) {
+    .post-card {
+      grid-template-columns: 1ch minmax(0, 1fr);
+      gap: 0.8rem;
+      padding: 1.25rem 1rem;
+    }
+
+    .post-date,
+    .featured-image {
+      grid-column: 2;
+    }
+
+    .post-body {
+      grid-column: 2;
+    }
+
+    .featured-image {
+      width: min(100%, 18rem);
+    }
+  }
+</style>

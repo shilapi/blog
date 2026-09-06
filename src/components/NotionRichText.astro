@@ -1,0 +1,92 @@
+---
+interface Props {
+  richText?: unknown;
+}
+
+type RecordLike = Record<string, unknown>;
+
+function asRecord(value: unknown): RecordLike | null {
+  return typeof value === "object" && value !== null
+    ? (value as RecordLike)
+    : null;
+}
+
+function textOf(item: RecordLike): string {
+  if (typeof item.plain_text === "string") return item.plain_text;
+  const text = asRecord(item.text);
+  return typeof text?.content === "string" ? text.content : "";
+}
+
+function hrefOf(item: RecordLike): string | undefined {
+  if (typeof item.href === "string") return item.href;
+  const text = asRecord(item.text);
+  const link = asRecord(text?.link);
+  return typeof link?.url === "string" ? link.url : undefined;
+}
+
+const items = Array.isArray(Astro.props.richText)
+  ? Astro.props.richText
+      .map(asRecord)
+      .filter((item): item is RecordLike => item !== null)
+  : [];
+---
+
+<span class="notion-rich-text">
+  {
+    items.map((item) => {
+      const annotations = asRecord(item.annotations);
+      const href = hrefOf(item);
+      const classes = {
+        "notion-bold": annotations?.bold === true,
+        "notion-italic": annotations?.italic === true,
+        "notion-underline": annotations?.underline === true,
+        "notion-strikethrough": annotations?.strikethrough === true,
+        "notion-code": annotations?.code === true,
+      };
+      const content = textOf(item);
+
+      return href ? (
+        <a href={href} class:list={classes}>
+          {content}
+        </a>
+      ) : (
+        <span class:list={classes}>{content}</span>
+      );
+    })
+  }
+</span>
+
+<style>
+  .notion-rich-text {
+    white-space: pre-wrap;
+  }
+
+  .notion-bold {
+    font-weight: 700;
+  }
+
+  .notion-italic {
+    font-style: italic;
+  }
+
+  .notion-underline {
+    text-decoration: underline;
+  }
+
+  .notion-strikethrough {
+    text-decoration: line-through;
+  }
+
+  .notion-code {
+    padding: 0.15em 0.35em;
+    border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--border) 28%, transparent);
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+  }
+
+  a {
+    color: var(--accent);
+    overflow-wrap: anywhere;
+  }
+</style>

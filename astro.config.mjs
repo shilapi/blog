@@ -1,5 +1,8 @@
 // @ts-check
-import { defineConfig } from 'astro/config';
+import { defineConfig } from "astro/config";
+import notionAssets from "./src/integrations/notion-assets";
 
 // https://astro.build/config
-export default defineConfig({});
+export default defineConfig({
+  integrations: [notionAssets()],
+});

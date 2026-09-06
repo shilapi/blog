@@ -12,9 +12,19 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^7.2.6"
+    "@notionhq/client": "^5.26.0",
+    "astro": "^7.2.6",
+    "heic-convert": "^2.1.0",
+    "sharp": "^0.35.4"
   },
   "allowScripts": {
     "esbuild": true
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@types/node": "^26.4.1",
+    "prettier": "3.9.6",
+    "prettier-plugin-astro": "0.14.1",
+    "typescript": "^6.0.3"
   }
 }

@@ -1,5 +1,9 @@
 # build output
 dist/
+
+# downloaded Notion-hosted media and optional block cache
+public/notion/
+tmp/
 # generated types
 .astro/
 

@@ -1,0 +1,98 @@
+---
+import PostCard from "../../components/PostCard.astro";
+import Layout from "../../layouts/Layout.astro";
+import { getPosts } from "../../lib/notion";
+
+const posts = (await getPosts()).filter((post) => post.type === "Post");
+---
+
+<Layout title="Posts" wideContent>
+  <section class="post-archive">
+    <a class="back-link" onclick="window.history.back()">../</a>
+
+    <div class="archive-heading">
+      <h1>posts</h1>
+    </div>
+
+    {
+      posts.length > 0 ? (
+        <div class="post-grid">
+          {posts.map((post) => (
+            <PostCard
+              slug={post.slug}
+              title={post.title}
+              excerpt={post.excerpt}
+              date={post.date}
+              tags={post.tags}
+              featuredImage={post.featuredImage}
+            />
+          ))}
+        </div>
+      ) : (
+        <p class="empty-state">暂无可公开显示的 Post。</p>
+      )
+    }
+  </section>
+</Layout>
+
+<style>
+  .post-archive {
+    --post-title-inset: calc(1.25rem + 0.625rem + 1rem);
+    padding-block: 56px 80px;
+  }
+
+  .back-link {
+    display: inline-block;
+    margin-left: var(--post-title-inset);
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .back-link:hover,
+  .back-link:focus-visible {
+    color: var(--accent);
+  }
+
+  .archive-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.65ch;
+    margin-top: 3rem;
+    margin-left: var(--post-title-inset);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    line-height: 1;
+  }
+
+  h1 {
+    margin: 0;
+    color: var(--foreground);
+    font: inherit;
+    font-size: clamp(2.5rem, 7vw, 5rem);
+    font-weight: 600;
+    padding-bottom: 1em;
+  }
+
+  .post-grid {
+    display: grid;
+  }
+
+  .empty-state {
+    margin: 0;
+    padding: 2rem 1.25rem;
+    color: var(--muted);
+    border-inline: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-mono);
+  }
+
+  @media (max-width: 760px) {
+    .post-archive {
+      --post-title-inset: calc(1rem + 0.625rem + 0.8rem);
+    }
+  }
+</style>
