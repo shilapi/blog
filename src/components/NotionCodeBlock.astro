@@ -27,26 +27,23 @@ const languageClass = language ? `language-${language}` : undefined;
 <style>
   .notion-code-shell {
     position: relative;
+    width: 100%;
     min-width: 0;
-  }
-
-  :global(li) > .notion-code-shell {
-    margin-top: 0.65rem;
   }
 
   .notion-code-copy {
     position: absolute;
     z-index: 1;
-    top: 0.65rem;
-    right: 0.75rem;
-    padding: 0.25rem 0.5rem;
+    top: 1em;
+    right: 1em;
+    padding: 0.6em;
     color: var(--muted);
     border: 0;
-    border-radius: 999px;
+    border-radius: 6px;
     background: color-mix(in srgb, var(--background) 76%, transparent);
     font-family: var(--font-mono);
-    font-size: 0.72rem;
-    line-height: 1.25;
+    font-size: 0.75rem;
+    line-height: 1;
     cursor: pointer;
   }
 
@@ -59,14 +56,14 @@ const languageClass = language ? `language-${language}` : undefined;
 
   .notion-code-block {
     overflow-x: auto;
-    margin: 0;
-    padding: 0.875rem 1rem;
+    margin: 4px 0;
+    padding: 1em;
     color: var(--foreground);
     border: 1px solid var(--border);
     background: #0d0a16;
     font-family: var(--font-mono);
-    font-size: 0.9em;
-    line-height: 1.6;
+    font-size: 85%;
+    line-height: 1.5;
     scrollbar-color: transparent transparent;
     scrollbar-width: thin;
     white-space: pre;

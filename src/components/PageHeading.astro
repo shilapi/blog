@@ -1,0 +1,58 @@
+---
+import BackLink from "./BackLink.astro";
+
+interface Props {
+  title: string;
+  backHref: string;
+  inset?: boolean;
+}
+
+const { title, backHref, inset = true } = Astro.props;
+---
+
+<div
+  class="page-heading-region"
+  style={!inset ? "--page-title-inset: 0" : undefined}
+>
+  <div class="page-back">
+    <BackLink href={backHref} />
+  </div>
+
+  <header class="page-heading">
+    <h1>{title}</h1>
+  </header>
+</div>
+
+<style>
+  .page-heading-region {
+    --page-title-inset: calc(1.25rem + 0.625rem + 1rem);
+  }
+
+  .page-back,
+  .page-heading {
+    margin-left: var(--page-title-inset);
+  }
+
+  .page-heading {
+    margin-top: 3rem;
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    line-height: 1;
+  }
+
+  h1 {
+    margin: 0;
+    padding-bottom: 1em;
+    color: var(--foreground);
+    font: inherit;
+    font-size: clamp(2.5rem, 7vw, 5rem);
+    font-weight: 600;
+  }
+
+  @media (max-width: 760px) {
+    .page-heading-region {
+      --page-title-inset: calc(1rem + 0.625rem + 0.8rem);
+    }
+  }
+</style>

@@ -1,6 +1,7 @@
 ---
 import type { Post } from "../data/posts";
 import { postHref } from "../lib/post-routes";
+import PostTags from "./PostTags.astro";
 
 interface Props {
   post: Post;
@@ -23,17 +24,7 @@ const { title, excerpt, date, tags, featuredImage } = post;
       <h3>{title}</h3>
       {excerpt && <p class="excerpt">{excerpt}</p>}
 
-      <ul class="tags">
-        {
-          tags.map((tag) => (
-            <li>
-              <span aria-hidden="true">[</span>
-              <a href={`/posts/tag/${encodeURIComponent(tag)}/`}>{tag}</a>
-              <span aria-hidden="true">]</span>
-            </li>
-          ))
-        }
-      </ul>
+      <PostTags tags={tags} />
     </div>
 
     {
@@ -133,29 +124,6 @@ const { title, excerpt, date, tags, featuredImage } = post;
     color: var(--muted);
     font-size: 0.92rem;
     line-height: 1.65;
-  }
-
-  .tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    margin: 0.75rem 0 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .tags li {
-    color: var(--accent);
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-  }
-
-  .tags a {
-    position: relative;
-    z-index: 3;
-    color: inherit;
-    pointer-events: auto;
-    text-decoration: none;
   }
 
   @media (max-width: 760px) {

@@ -1,5 +1,5 @@
 ---
-import BackLink from "../../components/BackLink.astro";
+import PageHeading from "../../components/PageHeading.astro";
 import PostList from "../../components/PostList.astro";
 import Layout from "../../layouts/Layout.astro";
 import { getPostsByType } from "../../lib/post-routes";
@@ -9,11 +9,7 @@ const posts = await getPostsByType("Post");
 
 <Layout title="Posts" wideContent>
   <section class="post-archive">
-    <div class="archive-back"><BackLink href="/" /></div>
-
-    <div class="archive-heading">
-      <h1>posts</h1>
-    </div>
+    <PageHeading title="posts" backHref="/" />
 
     <PostList posts={posts} emptyMessage="暂无可公开显示的 Post。" />
   </section>
@@ -21,38 +17,6 @@ const posts = await getPostsByType("Post");
 
 <style>
   .post-archive {
-    --post-title-inset: calc(1.25rem + 0.625rem + 1rem);
     padding-block: 56px 80px;
-  }
-
-  .archive-back {
-    margin-left: var(--post-title-inset);
-  }
-
-  .archive-heading {
-    display: flex;
-    align-items: center;
-    gap: 0.65ch;
-    margin-top: 3rem;
-    margin-left: var(--post-title-inset);
-    color: var(--accent);
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-    line-height: 1;
-  }
-
-  h1 {
-    margin: 0;
-    color: var(--foreground);
-    font: inherit;
-    font-size: clamp(2.5rem, 7vw, 5rem);
-    font-weight: 600;
-    padding-bottom: 1em;
-  }
-
-  @media (max-width: 760px) {
-    .post-archive {
-      --post-title-inset: calc(1rem + 0.625rem + 0.8rem);
-    }
   }
 </style>

@@ -1,0 +1,44 @@
+---
+interface Props {
+  tags: string[];
+}
+
+const { tags } = Astro.props;
+---
+
+<ul class="post-tags">
+  {
+    tags.map((tag) => (
+      <li>
+        <span aria-hidden="true">[</span>
+        <a href={`/posts/tag/${encodeURIComponent(tag)}/`}>{tag}</a>
+        <span aria-hidden="true">]</span>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 0.75rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .post-tags li {
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+  }
+
+  .post-tags a {
+    position: relative;
+    z-index: 3;
+    color: inherit;
+    pointer-events: auto;
+    text-decoration: none;
+  }
+</style>

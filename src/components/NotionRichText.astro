@@ -57,7 +57,7 @@ const items = Array.isArray(Astro.props.richText)
   }
 
   .notion-bold {
-    font-weight: 700;
+    font-weight: 600;
   }
 
   .notion-italic {
@@ -73,15 +73,22 @@ const items = Array.isArray(Astro.props.richText)
   }
 
   .notion-code {
-    padding: 0.15em 0.35em;
-    border: 1px solid var(--border);
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
     background: color-mix(in srgb, var(--border) 28%, transparent);
     font-family: var(--font-mono);
-    font-size: 0.9em;
+    font-size: 85%;
   }
 
   a {
-    color: var(--accent);
+    color: inherit;
+    border-bottom: 0.05em solid var(--muted);
+    opacity: 0.7;
     overflow-wrap: anywhere;
+    text-decoration: none;
+  }
+
+  a:hover {
+    opacity: 1;
   }
 </style>

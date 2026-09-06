@@ -28,7 +28,7 @@ const caption = data.caption;
       case "paragraph":
         return (
           <>
-            <p>
+            <p class:list={{ "notion-blank": text.length === 0 }}>
               <NotionRichText richText={richText} />
             </p>
             {block.children?.map((child) => (
