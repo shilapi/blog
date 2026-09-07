@@ -2,6 +2,8 @@
 
 这是一个静态 Astro 博客，以 notion 作为内容管理平台。
 
+See it running here: [lapiw.icu](lapiw.icu)
+
 ## 本地运行
 
 ```sh
