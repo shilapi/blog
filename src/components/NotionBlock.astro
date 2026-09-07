@@ -1,5 +1,6 @@
 ---
 import NotionCodeBlock from "./NotionCodeBlock.astro";
+import NotionBookmark from "./NotionBookmark.astro";
 import NotionRichText from "./NotionRichText.astro";
 import { textFromRichText, type NotionBlock as Block } from "../lib/notion";
 import {
@@ -259,20 +260,15 @@ const caption = data.caption;
         );
 
       case "bookmark":
-      case "embed":
-        return linkFromNotionData(data.url) ? (
-          <p class="notion-link">
-            <a
-              href={linkFromNotionData(data.url)}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {linkFromNotionData(data.url)}
-            </a>
-          </p>
+      case "link_preview":
+        return linkFromNotionData(data.url) && block.bookmarkPreview ? (
+          <NotionBookmark
+            url={linkFromNotionData(data.url)}
+            preview={block.bookmarkPreview}
+          />
         ) : null;
 
-      case "link_preview":
+      case "embed":
         return linkFromNotionData(data.url) ? (
           <p class="notion-link">
             <a
