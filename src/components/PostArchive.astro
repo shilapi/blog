@@ -1,0 +1,39 @@
+---
+import type { Post } from "../data/posts";
+import Layout from "../layouts/Layout.astro";
+import PageHeading from "./PageHeading.astro";
+import PostList from "./PostList.astro";
+
+interface Props {
+  title: string;
+  heading: string;
+  backHref: string;
+  posts: Post[];
+  description?: string;
+  ogImage?: string;
+  emptyMessage?: string;
+}
+
+const { title, heading, backHref, posts, description, ogImage, emptyMessage } =
+  Astro.props;
+---
+
+<Layout
+  title={title}
+  description={description}
+  ogImage={ogImage}
+  wideContent
+  fillViewport
+>
+  <section class="post-archive">
+    <PageHeading title={heading} backHref={backHref} />
+
+    <PostList posts={posts} emptyMessage={emptyMessage} />
+  </section>
+</Layout>
+
+<style>
+  .post-archive {
+    padding-block: 56px 80px;
+  }
+</style>

@@ -5,19 +5,14 @@ import PostCard from "./PostCard.astro";
 interface Props {
   posts: Post[];
   emptyMessage?: string;
-  bordered?: boolean;
 }
 
-const {
-  posts,
-  emptyMessage = "暂无可公开显示的文章。",
-  bordered = false,
-} = Astro.props;
+const { posts, emptyMessage = "暂无可公开显示的文章。" } = Astro.props;
 ---
 
 {
   posts.length > 0 ? (
-    <div class:list={["post-grid", { "has-border": bordered }]}>
+    <div class="post-grid">
       {posts.map((post) => (
         <PostCard post={post} />
       ))}
@@ -31,10 +26,6 @@ const {
   .post-grid {
     display: grid;
     grid-auto-rows: 1fr;
-  }
-
-  .post-grid.has-border {
-    border-inline: 1px solid var(--border);
   }
 
   .empty-state {

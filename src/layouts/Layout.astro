@@ -10,6 +10,8 @@ interface Props {
   description?: string;
   showSidebar?: boolean;
   wideContent?: boolean;
+  narrowContent?: boolean;
+  fillViewport?: boolean;
   ogImage?: string;
   ogType?: "website" | "article";
 }
@@ -19,6 +21,8 @@ const {
   description = siteConfig.description,
   showSidebar = true,
   wideContent = false,
+  narrowContent = false,
+  fillViewport = false,
   ogImage = "/og/site.png",
   ogType = "website",
 } = Astro.props;
@@ -79,6 +83,8 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? siteConfig.siteUrl);
     class:list={{
       "has-sidebar": showSidebar,
       "has-wide-content": wideContent,
+      "has-narrow-content": narrowContent,
+      "fills-viewport": fillViewport,
     }}
   >
     {showSidebar && <SiteSidebar />}

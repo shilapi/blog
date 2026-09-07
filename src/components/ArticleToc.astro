@@ -78,15 +78,13 @@ const hasHeadingOne = entries.some((entry) => entry.level === 1);
           const articleRight = article.getBoundingClientRect().right;
           const gap = 32;
           const viewportPadding = 24;
-          const available =
-            window.innerWidth - articleRight - gap - viewportPadding;
+          const tocLeft = Math.ceil(articleRight + gap);
+          const tocRight = tocLeft + widest;
+          const fitsViewport = tocRight <= window.innerWidth - viewportPadding;
 
           toc.style.setProperty("--toc-width", `${widest}px`);
-          toc.style.left = `${Math.ceil(articleRight + gap)}px`;
-          toc.toggleAttribute(
-            "data-ready",
-            widest > 0 && available >= widest && window.innerWidth >= 1100,
-          );
+          toc.style.left = `${tocLeft}px`;
+          toc.toggleAttribute("data-ready", widest > 0 && fitsViewport);
         });
       };
 
@@ -125,6 +123,7 @@ const hasHeadingOne = entries.some((entry) => entry.level === 1);
 
       measure();
       updateProgress();
+      document.fonts.ready.then(measure);
       window.addEventListener("resize", measure, { passive: true });
       window.addEventListener("resize", updateProgress, { passive: true });
       window.addEventListener("scroll", updateProgress, { passive: true });
@@ -170,7 +169,7 @@ const hasHeadingOne = entries.some((entry) => entry.level === 1);
   }
 
   a {
-    --entry-indent: 0px;
+    --label-indent: 0px;
     position: relative;
     display: block;
     width: 100%;
@@ -182,7 +181,7 @@ const hasHeadingOne = entries.some((entry) => entry.level === 1);
   }
 
   .has-heading-one a.is-secondary {
-    --entry-indent: 1rem;
+    --label-indent: 1rem;
   }
 
   a.is-passed {
@@ -192,7 +191,7 @@ const hasHeadingOne = entries.some((entry) => entry.level === 1);
   .toc-dot {
     position: absolute;
     top: 40%;
-    left: var(--entry-indent);
+    left: 0;
     width: 0.34rem;
     height: 0.34rem;
     border-radius: 50%;
@@ -207,7 +206,7 @@ const hasHeadingOne = entries.some((entry) => entry.level === 1);
     overflow: hidden;
     width: max-content;
     max-width: none;
-    margin-left: var(--entry-indent);
+    margin-left: var(--label-indent);
     opacity: 0;
     clip-path: inset(0 100% 0 0);
     white-space: nowrap;
