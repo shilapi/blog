@@ -1,8 +1,6 @@
 ---
-import BackLink from "../../../components/BackLink.astro";
-import PostList from "../../../components/PostList.astro";
+import PostArchive from "../../../components/PostArchive.astro";
 import type { Post } from "../../../data/posts";
-import Layout from "../../../layouts/Layout.astro";
 import { getPostTagStaticPaths } from "../../../lib/post-routes";
 
 export async function getStaticPaths() {
@@ -18,60 +16,9 @@ interface Props {
 const { posts } = Astro.props;
 ---
 
-<Layout title={`标签：${tag ?? ""}`}>
-  <section class="tag-archive">
-    <BackLink href="/posts/" />
-
-    <div class="archive-heading">
-      <h1>~/tags/{tag}</h1>
-      <span class="archive-rule" aria-hidden="true"></span>
-    </div>
-    <p class="archive-count">{posts.length} entries</p>
-
-    <PostList posts={posts} bordered />
-    <p class="archive-ending" aria-hidden="true">└─</p>
-  </section>
-</Layout>
-
-<style>
-  .tag-archive {
-    padding-block: 56px 80px;
-  }
-
-  .archive-heading {
-    display: flex;
-    align-items: center;
-    gap: 0.65ch;
-    margin-top: 3rem;
-    color: var(--accent);
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-    line-height: 1;
-  }
-
-  .archive-rule {
-    height: 1px;
-    flex: 1;
-    background: var(--border-strong);
-  }
-
-  h1 {
-    margin: 0;
-    color: var(--foreground);
-    font: inherit;
-    font-weight: 600;
-  }
-
-  .archive-count,
-  .archive-ending {
-    margin: 0;
-    color: var(--subtle);
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-  }
-
-  .archive-count {
-    padding: 1.25rem;
-    border-left: 1px solid var(--border);
-  }
-</style>
+<PostArchive
+  title={`标签：${tag ?? ""}`}
+  heading={tag ?? "tags"}
+  backHref="/posts/"
+  posts={posts}
+/>

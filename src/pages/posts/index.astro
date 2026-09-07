@@ -1,27 +1,16 @@
 ---
-import PageHeading from "../../components/PageHeading.astro";
-import PostList from "../../components/PostList.astro";
-import Layout from "../../layouts/Layout.astro";
+import PostArchive from "../../components/PostArchive.astro";
 import { getPostsByType } from "../../lib/post-routes";
 
 const posts = await getPostsByType("Post");
 ---
 
-<Layout
+<PostArchive
   title="Posts"
+  heading="posts"
+  backHref="/"
+  posts={posts}
   description="All posts."
   ogImage="/og/posts.png"
-  wideContent
->
-  <section class="post-archive">
-    <PageHeading title="posts" backHref="/" />
-
-    <PostList posts={posts} emptyMessage="暂无可公开显示的 Post。" />
-  </section>
-</Layout>
-
-<style>
-  .post-archive {
-    padding-block: 56px 80px;
-  }
-</style>
+  emptyMessage="暂无可公开显示的 Post。"
+/>

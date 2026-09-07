@@ -70,6 +70,23 @@ body.has-wide-content {
   --content-max-width: 1040px;
 }
 
+body.has-narrow-content {
+  --content-max-width: 780px;
+}
+
+body.fills-viewport {
+  display: flex;
+  flex-direction: column;
+}
+
+body.fills-viewport .site-main {
+  flex: 1 0 auto;
+}
+
+body.fills-viewport .site-footer {
+  flex: 0 0 auto;
+}
+
 .container {
   width: min(100% - 64px, var(--content-max-width));
   margin: 0 auto;
