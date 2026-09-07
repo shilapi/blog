@@ -2,7 +2,6 @@ import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { APIRoute, GetStaticPaths } from "astro";
-import sharp from "sharp";
 import { siteConfig } from "../../config";
 import { getPosts } from "../../lib/notion";
 import {
@@ -42,7 +41,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
       params: { key: ogImageKey(post) },
       props: {
         image: {
-          title: `${post.type === "Post" ? "~/posts/" : "~/"}${post.title}`,
+          title: post.type === "Post" ? post.title : `~/${post.title}`,
           description: post.excerpt || siteConfig.description,
           thumbnail: post.featuredImage,
         },
@@ -56,10 +55,7 @@ async function thumbnailData(source?: string): Promise<Buffer | undefined> {
   const sourcePath = path.join(process.cwd(), "public", source);
   if (!existsSync(sourcePath)) return undefined;
 
-  return sharp(await readFile(sourcePath))
-    .resize(520, 520, { fit: "cover", position: "attention" })
-    .jpeg({ quality: 88 })
-    .toBuffer();
+  return readFile(sourcePath);
 }
 
 export const GET: APIRoute<Props> = async ({ props }) => {

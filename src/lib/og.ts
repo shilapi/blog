@@ -3,6 +3,14 @@ import sharp, { type OverlayOptions } from "sharp";
 
 export const ogImageWidth = 1200;
 export const ogImageHeight = 630;
+export const ogThumbnailInset = 66;
+export const ogThumbnailHeight = ogImageHeight - ogThumbnailInset * 2;
+
+const textLeft = 64;
+const textRight = 600;
+const textWidth = textRight - textLeft;
+const titleFontSize = 54;
+const descriptionFontSize = 27;
 
 export interface OgImageData {
   title: string;
@@ -107,7 +115,6 @@ function textLayer(
     fontFile: string;
     fontSize: number;
     fontWeight: 400 | 600;
-    height: number;
     left: number;
     top: number;
     width: number;
@@ -120,8 +127,9 @@ function textLayer(
         font: `Pretendard ${options.fontSize}`,
         fontfile: options.fontFile,
         width: options.width,
-        height: options.height,
+        dpi: 72,
         rgba: true,
+        wrap: "none",
       },
     },
     left: options.left,
@@ -137,24 +145,60 @@ export async function renderOgImage(
     thumbnail?: Buffer;
   },
 ): Promise<Buffer> {
-  const hasThumbnail = Boolean(options.thumbnail);
-  const titleLines = wrapText(data.title, hasThumbnail ? 19 : 34, 2);
+  const normalizedThumbnail = options.thumbnail
+    ? await sharp(options.thumbnail)
+        .resize({ height: ogThumbnailHeight })
+        .jpeg({ quality: 88 })
+        .toBuffer()
+    : undefined;
+  const thumbnailMetadata = normalizedThumbnail
+    ? await sharp(normalizedThumbnail).metadata()
+    : undefined;
+  const measuredThumbnailWidth = thumbnailMetadata?.width ?? 0;
+  const thumbnailHeight = thumbnailMetadata?.height ?? 0;
+  const hasThumbnail =
+    Boolean(normalizedThumbnail) &&
+    measuredThumbnailWidth > 0 &&
+    thumbnailHeight > 0;
+  const maximumVisibleThumbnailWidth = ogImageWidth - ogThumbnailInset;
+  const thumbnailWidth = Math.min(
+    measuredThumbnailWidth,
+    maximumVisibleThumbnailWidth,
+  );
+  const thumbnailLeft = ogImageWidth - ogThumbnailInset - thumbnailWidth;
+  const thumbnailTop = ogThumbnailInset;
+  const titleLines = wrapText(data.title, textWidth / titleFontSize, 2);
   const descriptionLines = wrapText(
     data.description,
-    hasThumbnail ? 30 : 52,
+    textWidth / descriptionFontSize,
     2,
   );
   const titleTop = 86;
   const descriptionTop = titleTop + titleLines.length * 64 + 30;
   const layers: OverlayOptions[] = [];
 
-  if (options.thumbnail) {
-    layers.push({ input: options.thumbnail, left: 675, top: 52 });
+  if (normalizedThumbnail && hasThumbnail) {
+    const thumbnailInput =
+      measuredThumbnailWidth > maximumVisibleThumbnailWidth
+        ? await sharp(normalizedThumbnail)
+            .extract({
+              left: measuredThumbnailWidth - maximumVisibleThumbnailWidth,
+              top: 0,
+              width: maximumVisibleThumbnailWidth,
+              height: thumbnailHeight,
+            })
+            .toBuffer()
+        : normalizedThumbnail;
     layers.push({
-      input: fadeOverlay(330, 520),
-      raw: { width: 330, height: 520, channels: 4 },
-      left: 570,
-      top: 52,
+      input: thumbnailInput,
+      left: thumbnailLeft,
+      top: thumbnailTop,
+    });
+    layers.push({
+      input: fadeOverlay(thumbnailWidth, thumbnailHeight),
+      raw: { width: thumbnailWidth, height: thumbnailHeight, channels: 4 },
+      left: thumbnailLeft,
+      top: thumbnailTop,
     });
   }
 
@@ -163,24 +207,22 @@ export async function renderOgImage(
       textLayer(line, {
         color: "#f0ebff",
         fontFile: options.semiboldFontPath,
-        fontSize: 54,
+        fontSize: titleFontSize,
         fontWeight: 600,
-        height: 64,
-        left: 64,
+        left: textLeft,
         top: titleTop + index * 64,
-        width: hasThumbnail ? 650 : 1060,
+        width: textWidth,
       }),
     ),
     ...descriptionLines.map((line, index) =>
       textLayer(line, {
         color: "#aaa0c1",
         fontFile: options.regularFontPath,
-        fontSize: 27,
+        fontSize: descriptionFontSize,
         fontWeight: 400,
-        height: 42,
-        left: 64,
+        left: textLeft,
         top: descriptionTop + index * 42,
-        width: hasThumbnail ? 700 : 1060,
+        width: textWidth,
       }),
     ),
     {
@@ -192,7 +234,7 @@ export async function renderOgImage(
           background: "#4a3a68",
         },
       },
-      left: 1128,
+      left: 1159,
       top: 568,
     },
     {
@@ -204,7 +246,7 @@ export async function renderOgImage(
           background: "#4a3a68",
         },
       },
-      left: 1100,
+      left: 1128,
       top: 596,
     },
   );
