@@ -25,6 +25,10 @@ const { title, excerpt, date, tags, featuredImage } = post;
       {excerpt && <p class="excerpt">{excerpt}</p>}
 
       <PostTags tags={tags} />
+
+      <p class="post-date">
+        <time datetime={date}>{date}</time>
+      </p>
     </div>
 
     {
@@ -34,21 +38,22 @@ const { title, excerpt, date, tags, featuredImage } = post;
         </div>
       )
     }
-
-    <p class="post-date">
-      <time datetime={date}>{date}</time>
-    </p>
   </article>
 </div>
 
 <style>
   .post-card {
+    --post-card-padding: 1.25rem;
+    --post-card-image-width: 12.75rem;
     z-index: 2;
     display: grid;
-    grid-template-columns: 0.625rem minmax(0, 1fr) 9rem max-content;
+    grid-template-columns:
+      0.625rem minmax(0, 1fr)
+      var(--post-card-image-width);
     gap: 1rem;
-    align-items: start;
-    padding: 1.25rem;
+    align-items: stretch;
+    min-height: 11rem;
+    padding: var(--post-card-padding);
     pointer-events: none;
   }
 
@@ -76,19 +81,19 @@ const { title, excerpt, date, tags, featuredImage } = post;
   }
 
   .post-date {
-    margin: 0.25rem 1rem 0;
+    margin: 1rem 0 0;
     color: var(--muted);
     font-family: var(--font-mono);
     font-size: 0.875rem;
-    justify-self: end;
     pointer-events: none;
     white-space: nowrap;
-    grid-column: 4;
   }
 
   .post-body {
-    min-width: 0;
     position: static;
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
   }
 
   h3 {
@@ -105,17 +110,20 @@ const { title, excerpt, date, tags, featuredImage } = post;
   }
 
   .featured-image {
+    position: absolute;
+    top: var(--post-card-padding);
+    right: var(--post-card-padding);
+    bottom: var(--post-card-padding);
     display: block;
-    width: 9rem;
+    width: var(--post-card-image-width);
     pointer-events: none;
-    grid-column: 3;
   }
 
   .featured-image img {
     display: block;
     width: 100%;
-    aspect-ratio: 3 / 2;
-    border: 1px solid var(--border);
+    height: 100%;
+    box-sizing: border-box;
     object-fit: cover;
   }
 
@@ -128,14 +136,12 @@ const { title, excerpt, date, tags, featuredImage } = post;
 
   @media (max-width: 760px) {
     .post-card {
-      grid-template-columns: 1ch minmax(0, 1fr);
+      --post-card-padding: 1rem;
+      --post-card-image-width: clamp(4.5rem, 28vw, 12.75rem);
+      grid-template-columns:
+        1ch minmax(0, 1fr)
+        var(--post-card-image-width);
       gap: 0.8rem;
-      padding: 1.25rem 1rem;
-    }
-
-    .post-date,
-    .featured-image {
-      grid-column: 2;
     }
 
     .post-body {
@@ -143,7 +149,7 @@ const { title, excerpt, date, tags, featuredImage } = post;
     }
 
     .featured-image {
-      width: min(100%, 18rem);
+      width: var(--post-card-image-width);
     }
   }
 </style>
