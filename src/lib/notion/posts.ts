@@ -1,5 +1,6 @@
 import { Client, isFullPage, type PageObjectResponse } from "@notionhq/client";
 import { posts as localPosts, type Post } from "../../data/posts";
+import { isPublicationDateVisible } from "../publication-date";
 import { dataSourceId, notion, notionToken, requestNotion } from "./client";
 import { persistFile } from "./media";
 import { asRecord, textFromRichText } from "./shared";
@@ -134,7 +135,7 @@ async function fetchPosts(): Promise<Post[]> {
     );
     return posts
       .filter((post): post is Post => post !== null)
-      .filter((post) => post.date <= new Date().toISOString().slice(0, 10))
+      .filter((post) => isPublicationDateVisible(post.date))
       .sort((a, b) => b.date.localeCompare(a.date));
   } catch (error) {
     const message = error instanceof Error ? error.message : "未知错误";
