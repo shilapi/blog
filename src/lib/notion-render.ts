@@ -43,6 +43,29 @@ export function groupNotionLists(blocks: NotionBlock[]): NotionBlock[] {
   return grouped;
 }
 
+const groupedListTypes = new Set([
+  "bulleted_list",
+  "numbered_list",
+  "to_do_list",
+]);
+
+function groupNotionBlockChildren(block: NotionBlock): NotionBlock {
+  if (!block.children?.length) return block;
+
+  // A generated list container already owns list-item children. Preserve that
+  // level, but normalize any nested children belonging to each list item.
+  const children = groupedListTypes.has(block.type)
+    ? block.children.map(groupNotionBlockChildren)
+    : groupNotionListsDeep(block.children);
+
+  return { ...block, children };
+}
+
+/** Group list items at every nesting level of a Notion block tree. */
+export function groupNotionListsDeep(blocks: NotionBlock[]): NotionBlock[] {
+  return groupNotionLists(blocks).map(groupNotionBlockChildren);
+}
+
 export function notionHeadings(blocks: NotionBlock[]): NotionBlock[] {
   return blocks.flatMap((block) => [
     ...(["heading_1", "heading_2", "heading_3"].includes(block.type)

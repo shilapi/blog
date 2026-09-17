@@ -1,14 +1,14 @@
 ---
 import NotionBlock from "./NotionBlock.astro";
 import type { NotionBlock as Block } from "../lib/notion";
-import { groupNotionLists, notionHeadings } from "../lib/notion-render";
+import { groupNotionListsDeep, notionHeadings } from "../lib/notion-render";
 import "../styles/notion-blocks.css";
 
 interface Props {
   blocks: Block[];
 }
 
-const groupedBlocks = groupNotionLists(Astro.props.blocks);
+const groupedBlocks = groupNotionListsDeep(Astro.props.blocks);
 const headings = notionHeadings(Astro.props.blocks);
 ---
 
