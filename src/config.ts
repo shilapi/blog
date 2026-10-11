@@ -25,3 +25,16 @@ export const serviceLinks = [
     description: "Config editor for surge, a proxy tool.",
   },
 ] satisfies ServiceLink[];
+
+export const projectLinks = [
+  {
+    label: "xcertplay",
+    href: "https://github.com/shilapi/xcertplay/",
+    description: "Open-source CarPlay solution for Android head units.",
+  },
+  {
+    label: "ClipperOne",
+    href: "https://github.com/KarkeNeko/ClipperOne/",
+    description: "Open-source replica of Flipper Zero.",
+  },
+] satisfies ServiceLink[];
