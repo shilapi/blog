@@ -3,25 +3,29 @@ import Layout from "../layouts/Layout.astro";
 import JumpTile from "../components/JumpTile.astro";
 import { serviceLinks, projectLinks, siteConfig } from "../config";
 
-const sections = [
-  {
-    title: "localhost",
-    links: [
-      {
-        label: "~/posts",
-        href: "/posts/",
-        description: "All posts.",
-      },
-      {
-        label: "~/aboutme",
-        href: "/about/",
-        description: "About me, yes it's about me.",
-      },
-    ],
-  },
+const localhostSection = {
+  title: "localhost",
+  links: [
+    {
+      label: "~/posts",
+      href: "/posts/",
+      description: "All posts.",
+    },
+    {
+      label: "~/aboutme",
+      href: "/about/",
+      description: "About me, yes it's about me.",
+    },
+  ],
+};
+
+// localhost stays first; the rest are ordered by link count, densest first.
+const configSections = [
   { title: "services", links: serviceLinks },
   { title: "projects", links: projectLinks },
-];
+].sort((a, b) => b.links.length - a.links.length);
+
+const sections = [localhostSection, ...configSections];
 ---
 
 <Layout showSidebar={false}>
