@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://lapiw.icu/sitemap-index.xml
