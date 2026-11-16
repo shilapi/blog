@@ -75,6 +75,57 @@ Token 只放在本地 `.env` 或 Cloudflare 的环境变量中，不要提交到
 
 这是静态部署；Notion 内容更新后需要触发一次新的构建。Git 集成可以在每次推送后自动部署。本地可运行 `npm run deploy` 完成构建并部署，或用 `npx wrangler deploy --dry-run` 只验证部署包。
 
+### Notion 更新后自动部署
+
+`workers/notion-webhook/` 是独立的通知接收 Worker：Notion 内容变更 → 验证签名 → 调用博客的 Deploy Hook → Workers Builds 重新读取 Notion、构建并部署。博客继续使用静态资源部署。
+
+使用一个**只授权博客数据库的 Notion connection**。这个接收器会为该订阅的所有受支持内容事件触发构建；它不会按数据库 ID 或文章状态筛选，因此也能处理文章改成 Private、删除和移出数据库的情况。不要复用有其他内容访问权限的 connection。
+
+1. 在 Cloudflare 的博客 Worker（`blog`）中，确认已连接 Git 仓库，进入 **Settings → Builds → Deploy Hooks**，创建名为 `notion` 的 Hook，选择生产分支并复制 URL。构建环境继续保留 `NOTION_TOKEN`、`NOTION_DATA_SOURCE_ID`，不要启用 `NOTION_BLOCK_CACHE`。
+
+2. 登录并部署通知 Worker，然后交互式保存 Hook URL（不要提交到 Git）：
+
+   ```sh
+   npx wrangler login
+   npm run deploy:webhook
+   npx wrangler secret put CLOUDFLARE_DEPLOY_HOOK_URL --config workers/notion-webhook/wrangler.jsonc
+   ```
+
+3. 在另一个终端监听通知 Worker 的实时日志：
+
+   ```sh
+   npx wrangler tail --config workers/notion-webhook/wrangler.jsonc --format pretty
+   ```
+
+4. 打开 [Notion connection 设置](https://www.notion.so/profile/integrations)，选择博客使用的 connection，在 **Webhooks → Create a subscription** 中填写上一步部署返回的 Worker URL，加上 `/notion` 路径。订阅以下事件：
+
+   - `page.created`、`page.content_updated`、`page.properties_updated`
+   - `page.deleted`、`page.undeleted`、`page.moved`
+   - `data_source.content_updated`、`data_source.schema_updated`
+   - `data_source.deleted`、`data_source.undeleted`、`data_source.moved`
+
+5. 创建订阅后，在实时日志找到 `Notion subscription verification: secret_...`。保存这个验证 token 为 Worker secret，再将同一个值填进 Notion 的 **Verify subscription**：
+
+   ```sh
+   npx wrangler secret put NOTION_VERIFICATION_TOKEN --config workers/notion-webhook/wrangler.jsonc
+   ```
+
+   初始化阶段只输出验证 token，不触发构建；配置 secret 后停止输出 token，所有事件必须通过 HMAC 签名校验。接收器默认关闭持久化日志，验证 token 和 Hook URL 都应作为凭据保管。重新创建订阅时，需要删除旧 secret 后重复验证流程。
+
+6. 修改一篇文章的正文，观察博客 Worker 的构建历史，应该出现由 `notion` Deploy Hook 触发的构建；构建完成后确认网站更新。再验证标题/状态修改、新增和删除文章。
+
+Notion 会合并部分高频事件，通常在一分钟内发送，之后还需要等待构建完成。Cloudflare 仅在上一次构建仍处于 queued/initializing 阶段时合并重复 Hook 调用；持续编辑可能产生多次构建。接收器在 Hook 失败时返回 502，让 Notion 按其重试策略重发；Hook 接受请求之后的构建失败仍需在 Cloudflare 中查看并重试。未来日期文章到期本身不会发送变更事件，仍需手动构建或另加定时构建。
+
+本地验证接收器：
+
+```sh
+npm run test:webhook
+npm run check
+npm run deploy:webhook -- --dry-run
+```
+
+参考：[Workers Deploy Hooks](https://developers.cloudflare.com/workers/ci-cd/builds/deploy-hooks/)、[Notion Webhooks](https://developers.notion.com/reference/webhooks)、[事件与重试策略](https://developers.notion.com/reference/webhooks-events-delivery)。
+
 ## Contributor
 
 Thanks for GPT5.6 & CodeX.

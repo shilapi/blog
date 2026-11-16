@@ -14,7 +14,9 @@
     "format:check": "prettier --check .",
     "astro": "astro",
     "generate-types": "wrangler types",
-    "deploy": "npm run build && wrangler deploy"
+    "deploy": "npm run build && wrangler deploy",
+    "deploy:webhook": "wrangler deploy --config workers/notion-webhook/wrangler.jsonc",
+    "test:webhook": "node --test tests/notion-webhook.test.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",

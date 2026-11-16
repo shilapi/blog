@@ -1,0 +1,10 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "blog-notion-webhook",
+  "main": "index.ts",
+  "compatibility_date": "2026-09-06",
+  "workers_dev": true,
+  // Secrets: NOTION_VERIFICATION_TOKEN, CLOUDFLARE_DEPLOY_HOOK_URL.
+  // Keep bootstrap verification tokens out of persisted observability logs.
+  "observability": { "enabled": false },
+}
