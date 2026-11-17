@@ -92,7 +92,7 @@ async function pageToPost(page: PageObjectResponse): Promise<Post | null> {
   const excerpt =
     textProperty(properties, "Summary") || textProperty(properties, "Excerpt");
   const featuredFile =
-    firstFileProperty(properties, "FeaturedImage") || asRecord(page.cover);
+    firstFileProperty(properties, "thumbnail") || asRecord(page.cover);
 
   return {
     slug,
