@@ -1,6 +1,6 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import path from "node:path";
 import sharp from "sharp";
@@ -15,6 +15,89 @@ import type { UnknownRecord } from "./types";
 
 const mediaPromisesBySource = new Map<string, Promise<string | undefined>>();
 const mediaPathsByContentHash = new Map<string, string>();
+
+// Workers Builds restores node_modules/.astro when Build cache is enabled.
+// Bump the version if media conversion settings or the index format change.
+const mediaCacheDirectory = path.join(
+  process.cwd(),
+  "node_modules",
+  ".astro",
+  "notion-media",
+  "v1",
+);
+
+function sourceCachePath(sourceKey: string): string {
+  const key = createHash("sha256").update(sourceKey).digest("hex");
+  return path.join(mediaCacheDirectory, "sources", `${key}.json`);
+}
+
+async function writeAtomically(
+  destination: string,
+  contents: string | Uint8Array,
+): Promise<void> {
+  await mkdir(path.dirname(destination), { recursive: true });
+  const temporary = `${destination}.${randomUUID()}.tmp`;
+  try {
+    await writeFile(temporary, contents);
+    await rename(temporary, destination);
+  } finally {
+    await rm(temporary, { force: true });
+  }
+}
+
+async function restoreCachedMedia(
+  sourceKey: string,
+): Promise<string | undefined> {
+  let filename: string;
+  let contents: Buffer<ArrayBufferLike>;
+  try {
+    const entry = asRecord(
+      JSON.parse(await readFile(sourceCachePath(sourceKey), "utf8")),
+    );
+    if (
+      typeof entry?.filename !== "string" ||
+      !/^[a-f0-9]{64}\.[a-z0-9]{1,8}$/.test(entry.filename)
+    ) {
+      return undefined;
+    }
+    filename = entry.filename;
+    contents = await readFile(
+      path.join(mediaCacheDirectory, "files", filename),
+    );
+    const hash = createHash("sha256").update(contents).digest("hex");
+    if (hash !== filename.split(".")[0]) return undefined;
+  } catch {
+    // Missing, incomplete, or corrupt caches fall back to a fresh download.
+    return undefined;
+  }
+
+  const destination = localAssetPath(filename);
+  await mkdir(path.dirname(destination), { recursive: true });
+  if (!existsSync(destination)) await writeFile(destination, contents);
+  const assetPath = `/notion/${filename}`;
+  mediaPathsByContentHash.set(filename.slice(0, 64), assetPath);
+  return assetPath;
+}
+
+async function cacheMedia(
+  sourceKey: string,
+  filename: string,
+  contents: Uint8Array,
+): Promise<void> {
+  try {
+    // Publish the index only after the complete, converted file is available.
+    await writeAtomically(
+      path.join(mediaCacheDirectory, "files", filename),
+      contents,
+    );
+    await writeAtomically(
+      sourceCachePath(sourceKey),
+      JSON.stringify({ filename }),
+    );
+  } catch {
+    console.warn("无法写入 Notion 媒体缓存；本次构建仍使用已下载的文件。");
+  }
+}
 
 type HeicConverter = (options: {
   buffer: Buffer<ArrayBufferLike>;
@@ -102,7 +185,11 @@ async function convertHeicToJpeg(
 async function persistNotionFile(
   assetId: string,
   url: string,
+  sourceKey: string,
 ): Promise<string | undefined> {
+  const restored = await restoreCachedMedia(sourceKey);
+  if (restored) return restored;
+
   const response = await fetchNotionMedia(url);
   if (!response) {
     console.warn(
@@ -131,14 +218,16 @@ async function persistNotionFile(
 
   const contentHash = createHash("sha256").update(contents).digest("hex");
   const cachedPath = mediaPathsByContentHash.get(contentHash);
-  if (cachedPath) return cachedPath;
-
-  const destination = localAssetPath(`${contentHash}${extension}`);
+  const filename = cachedPath
+    ? path.basename(cachedPath)
+    : `${contentHash}${extension}`;
+  const destination = localAssetPath(filename);
   await mkdir(path.dirname(destination), { recursive: true });
   if (!existsSync(destination)) await writeFile(destination, contents);
 
   const assetPath = `/notion/${path.basename(destination)}`;
   mediaPathsByContentHash.set(contentHash, assetPath);
+  await cacheMedia(sourceKey, filename, contents);
   return assetPath;
 }
 
@@ -156,7 +245,7 @@ export async function persistFile(
   const existing = mediaPromisesBySource.get(sourceKey);
   if (existing) return existing;
 
-  const download = persistNotionFile(assetId, url);
+  const download = persistNotionFile(assetId, url, sourceKey);
   mediaPromisesBySource.set(sourceKey, download);
   return download;
 }

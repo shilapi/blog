@@ -23,8 +23,8 @@ async function copyDirectory(
 }
 
 /**
- * Astro copies `public/` before page rendering. Notion media is downloaded
- * while pages render, so copy it into the final output after the build too.
+ * Astro copies `public/` before page rendering. Notion media is downloaded or
+ * restored from cache while pages render, so copy it after the build too.
  * This directory is generated only; resetting it prevents filenames left by
  * old builds from being copied into the current deployment.
  */

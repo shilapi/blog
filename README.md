@@ -62,6 +62,16 @@ Token 只放在本地 `.env` 或 Cloudflare 的环境变量中，不要提交到
 
 默认支持的图片/文件策略是“构建时下载”。Notion 托管的文件 URL 只有短期有效期，所以不能直接把它当长期静态资源；构建钩子会把下载结果复制到 `dist/notion`。可选地设置 `NOTION_BLOCK_CACHE=true` 使用 `tmp/` 中的 Block 缓存（默认关闭，保证每次构建读取最新内容）。
 
+媒体文件及其来源索引会自动缓存到 `node_modules/.astro/notion-media/v1/`，包含 HEIC 转换后的 JPEG。相同 Notion 文件的临时签名更新不会导致重复下载；替换为新的文件路径时会重新下载。缓存命中时校验内容哈希，缓存缺失或损坏时自动重新下载。每次构建仍清空 `public/notion`，只恢复本次实际引用的资源，因此旧缓存不会被整体打包进部署。
+
+在 Cloudflare 博客 Worker 的 **Settings → Build → Build cache** 中启用缓存，Workers Builds 就会在后续构建间恢复 `node_modules/.astro`。第一次构建填充缓存，后续构建才能复用；缓存被平台清除时会自动重建。该开关需在 Cloudflare 控制台设置，仓库配置不会自动开启它。正文继续读取最新 Notion 内容，无需启用 `NOTION_BLOCK_CACHE`。需要强制重新下载媒体时，在控制台 Clear Cache；本地可运行：
+
+```sh
+rm -rf node_modules/.astro/notion-media
+```
+
+平台行为参考：[Workers Build caching](https://developers.cloudflare.com/workers/ci-cd/builds/build-caching/)。
+
 ## Cloudflare Workers
 
 本站使用 Astro 静态输出，由 `wrangler.jsonc` 将构建后的 `dist` 作为 Workers Static Assets 部署，不需要 `@astrojs/cloudflare` adapter。
