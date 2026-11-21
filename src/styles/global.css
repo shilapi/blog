@@ -71,7 +71,7 @@ body.has-wide-content {
 }
 
 body.has-narrow-content {
-  --content-max-width: 780px;
+  --content-max-width: 44rem;
 }
 
 body.fills-viewport {

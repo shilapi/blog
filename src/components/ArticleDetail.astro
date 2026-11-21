@@ -70,7 +70,6 @@ const tocEntries = notionHeadingEntries(blocks);
   .post-detail {
     width: 100%;
     padding-block: 56px 80px;
-    font-family: "Pretendard", var(--font-sans);
   }
 
   .post-meta {
@@ -106,8 +105,12 @@ const tocEntries = notionHeadingEntries(blocks);
   .content {
     margin: 0;
     color: var(--foreground);
-    font-size: 1rem;
-    line-height: 1.5;
+    font-family: "Pretendard", "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: clamp(1.0625rem, 1rem + 0.25vw, 1.125rem);
+    font-weight: 400;
+    line-height: 1.8;
+    text-autospace: ideograph-alpha ideograph-numeric;
+    overflow-wrap: anywhere;
     white-space: normal;
   }
 

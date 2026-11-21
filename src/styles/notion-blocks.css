@@ -23,14 +23,14 @@
 .notion-blocks > p,
 .notion-blocks li > p {
   width: 100%;
-  margin: 1px 0;
-  padding: 3px 2px;
+  margin: 0;
+  padding: 0;
   white-space: pre-wrap;
   word-break: break-word;
 }
 
-.notion-blocks > p:first-child {
-  margin-top: 2px;
+.notion-blocks p:not(.notion-blank) + p:not(.notion-blank) {
+  margin-top: 0.85em;
 }
 
 .notion-blocks .notion-blank {
@@ -44,9 +44,9 @@
   display: inline-block;
   max-width: 100%;
   margin-right: 0;
-  margin-bottom: 1px;
+  margin-bottom: 0.4em;
   margin-left: 0;
-  padding: 3px 2px;
+  padding: 0;
   font-weight: 600;
   line-height: 1.3;
   white-space: pre-wrap;
@@ -59,17 +59,17 @@
 
 .notion-blocks h2 {
   margin-top: 1.08em;
-  font-size: 1.875em;
+  font-size: 1.65em;
 }
 
 .notion-blocks h3 {
   margin-top: 1.1em;
-  font-size: 1.5em;
+  font-size: 1.35em;
 }
 
 .notion-blocks h4 {
   margin-top: 1em;
-  font-size: 1.25em;
+  font-size: 1.15em;
 }
 
 .notion-blocks > h2:first-child {
@@ -82,7 +82,7 @@
   margin: 6px 0;
   padding: 0.2em 0.9em;
   border-left: 3px solid currentcolor;
-  font-size: 1.2em;
+  font-size: 1em;
   white-space: pre-wrap;
   word-break: break-word;
 }
